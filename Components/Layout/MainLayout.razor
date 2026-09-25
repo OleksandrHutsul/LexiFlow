@@ -1,0 +1,40 @@
+@using LexiFlow.Components.Shared.Auth
+@using LexiFlow.Components.Shared.Layout
+@using LexiFlow.Components.Shared.Notifications
+@inherits LayoutComponentBase
+
+<RouteTitleComponent />
+<MudThemeProvider Theme="_theme" IsDarkMode="_darkMode" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout Class="lexi-layout">
+    <MudAppBar Elevation="0" Class="topbar">
+        <MudIconButton Icon="@Icons.Material.Rounded.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="() => _drawerOpen = !_drawerOpen" aria-label="Toggle navigation" />
+        <a class="brand" href="/">
+            <span class="brand-mark">L</span>
+            <span>LexiFlow</span>
+        </a>
+        <MudSpacer />
+        <LexiFlow.Components.Shared.Auth.LoginStatusComponent />
+        <AuthorizeView><Authorized><NotificationBellComponent /></Authorized></AuthorizeView>
+        <MudIconButton Icon="@(_darkMode ? Icons.Material.Rounded.LightMode : Icons.Material.Rounded.DarkMode)" Color="Color.Inherit" OnClick="ToggleTheme" aria-label="Toggle theme" />
+        <UserMenuComponent />
+    </MudAppBar>
+
+    <MudDrawer @bind-Open="_drawerOpen" Variant="DrawerVariant.Responsive" Breakpoint="Breakpoint.Md" ClipMode="DrawerClipMode.Always" Elevation="0" Class="side-drawer">
+        <NavMenu />
+    </MudDrawer>
+
+    <MudMainContent Class="main-content">
+        <div class="ambient ambient-one"></div>
+        <div class="ambient ambient-two"></div>
+        <div class="main-content-shell">
+            <main class="page-transition">
+                @Body
+            </main>
+            <AppFooterComponent />
+        </div>
+    </MudMainContent>
+</MudLayout>

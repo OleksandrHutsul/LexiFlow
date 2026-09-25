@@ -1,0 +1,27 @@
+.user-menu-button {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    place-items: center;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    color: white;
+    background: linear-gradient(135deg, var(--mud-palette-primary), var(--mud-palette-secondary));
+    box-shadow: 0 12px 30px color-mix(in srgb, var(--mud-palette-primary) 28%, transparent);
+    cursor: pointer;
+    transition: transform .18s ease, box-shadow .18s ease;
+}
+
+    .user-menu-button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 16px 36px color-mix(in srgb, var(--mud-palette-primary) 36%, transparent);
+    }
+
+.user-menu-heading {
+    display: grid;
+    gap: .15rem;
+}
+
+    .user-menu-heading small {
+        color: var(--mud-palette-text-secondary);
+    }

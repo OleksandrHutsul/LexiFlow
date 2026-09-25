@@ -1,0 +1,118 @@
+<div class="search-component @(_focused ? "is-focused" : "")" @onfocusin="KeepOpen" @onfocusout="CloseAfterFocusLeaves">
+    <div class="search-shell">
+        <MudIcon Icon="@Icons.Material.Rounded.Search" Class="search-icon" />
+
+        <input @ref="_input"
+               value="@Query"
+               @oninput="OnInput"
+               @onkeydown="OnKeyDown"
+               placeholder="@Placeholder"
+               aria-label="Search dictionary"
+               aria-expanded="@_focused"
+               aria-controls="dictionary-search-results"
+               aria-autocomplete="list"
+               autocomplete="off" />
+
+        @if (_loading)
+        {
+            <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="search-spinner" />
+        }
+        else if (!string.IsNullOrWhiteSpace(Query))
+        {
+            <button class="ghost-icon" type="button" @onclick="Clear" aria-label="Clear search">
+                <MudIcon Icon="@Icons.Material.Rounded.Close" Size="Size.Small" />
+            </button>
+        }
+    </div>
+
+    @if (_focused)
+    {
+        <div id="dictionary-search-results" class="search-popover" role="listbox" aria-label="Dictionary suggestions" aria-busy="@_loading">
+            @if (_loading)
+            {
+                <div class="search-popover-status" role="status">
+                    <strong>Searching dictionary…</strong>
+                    <small>Suggestions will appear here.</small>
+                </div>
+
+                <div class="skeleton-list search-skeleton" aria-hidden="true">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            }
+            else if (_suggestions.Count > 0)
+            {
+                <div class="search-popover-status">
+                    <strong>Select a word to open it</strong>
+                    <small>Use ↑ ↓ and Enter, or click a result.</small>
+                </div>
+
+                @for (var i = 0; i < _suggestions.Count; i++)
+                {
+                    var suggestion = _suggestions[i];
+
+                    <button class="suggestion-row @(i == _activeIndex ? "active" : "")" type="button" role="option" aria-selected="@(i == _activeIndex)" @onclick="() => Select(suggestion.Word)">
+                        <MudIcon Icon="@Icons.Material.Rounded.AutoStories" />
+                        <span>@suggestion.Word</span>
+
+                        @if (!string.IsNullOrWhiteSpace(suggestion.Level))
+                        {
+                            <em>@suggestion.Level</em>
+                        }
+                    </button>
+                }
+            }
+            else if (!string.IsNullOrWhiteSpace(_searchError))
+            {
+                <div class="search-empty search-error" role="alert">
+                    <MudIcon Icon="@Icons.Material.Rounded.CloudOff" />
+
+                    <div>
+                        <strong>Search is unavailable</strong>
+                        <small>@_searchError</small>
+                    </div>
+                </div>
+            }
+            else if (_hasSearched)
+            {
+                <div class="search-empty" role="status">
+                    <MudIcon Icon="@Icons.Material.Rounded.SearchOff" />
+
+                    <div>
+                        <strong>No suggestions found</strong>
+                        <small>Check the spelling, or press Enter to search for the exact text.</small>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="search-popover-status">
+                    <strong>Start typing to search</strong>
+                    <small>Enter at least 2 characters.</small>
+                </div>
+
+                <div class="suggestion-group">
+                    @if (_recent.Count > 0)
+                    {
+                        <small>Recent</small>
+
+                        @foreach (var word in _recent.Take(5))
+                        {
+                            <button class="suggestion-chip" type="button" @onclick="() => Select(word)">@word</button>
+                        }
+                    }
+                </div>
+
+                <div class="suggestion-group">
+                    <small>Suggested</small>
+
+                    @foreach (var word in SuggestedWords)
+                    {
+                        <button class="suggestion-chip" type="button" @onclick="() => Select(word)">@word</button>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>

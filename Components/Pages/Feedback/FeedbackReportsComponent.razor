@@ -1,0 +1,121 @@
+@page "/admin/feedback"
+@using LexiFlow.Components.Shared.UI
+@using LexiFlow.Models.FeedbackModels
+@attribute [Authorize(Roles = "Admin")]
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="screen">
+    <div class="feedback-screen">
+    <section class="page-header reveal">
+        <span class="eyebrow">Developer</span>
+        <h1>Feedback reports</h1>
+        <p>Review bug reports and feedback submitted by users.</p>
+    </section>
+
+    @if (_loading)
+    {
+        <div class="word-skeleton reveal">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    }
+    else if (!string.IsNullOrWhiteSpace(_error))
+    {
+        <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined">@_error</MudAlert>
+    }
+    else if (_reports.Count == 0)
+    {
+        <EmptyStateComponent Title="No reports yet" Text="Submitted feedback will appear here." />
+    }
+    else
+    {
+        <section class="glass-card feedback-admin-table reveal">
+            <MudTable T="FeedbackReportItem"
+                      Items="_reports"
+                      Hover="true"
+                      Dense="true"
+                      Breakpoint="Breakpoint.Sm"
+                      OnRowClick="HandleRowClick">
+                <HeaderContent>
+                    <MudTh>Created</MudTh>
+                    <MudTh>Type</MudTh>
+                    <MudTh>Status</MudTh>
+                    <MudTh>Page</MudTh>
+                    <MudTh>Contact</MudTh>
+                    <MudTh>Description</MudTh>
+                </HeaderContent>
+
+                <RowTemplate>
+                    <MudTd DataLabel="Created">@context.CreatedAt.LocalDateTime.ToString("g")</MudTd>
+                    <MudTd DataLabel="Type">@context.Type</MudTd>
+                    <MudTd DataLabel="Status">
+                        <span class="level-pill">@FormatStatus(context.Status)</span>
+                    </MudTd>
+                    <MudTd DataLabel="Page">@(context.PageOrFeature ?? "—")</MudTd>
+                    <MudTd DataLabel="Contact">@(context.ContactEmail ?? context.UserEmail ?? "—")</MudTd>
+                    <MudTd DataLabel="Description">@Truncate(context.Description, 80)</MudTd>
+                </RowTemplate>
+            </MudTable>
+        </section>
+
+        @if (_selected is not null)
+        {
+            <section class="glass-card feedback-detail reveal">
+                <div class="section-heading">
+                    <div>
+                        <span class="eyebrow">Report detail</span>
+                        <h2>@_selected.Type</h2>
+                    </div>
+
+                    <MudIconButton Icon="@Icons.Material.Rounded.Close"
+                                   OnClick="CloseDetail"
+                                   aria-label="Close report detail" />
+                </div>
+
+                <MudSelect T="string" @bind-Value="_status" Label="Status" Variant="Variant.Outlined">
+                    @foreach (var status in Statuses)
+                    {
+                        <MudSelectItem T="string" Value="@status">@FormatStatus(status)</MudSelectItem>
+                    }
+                </MudSelect>
+
+                <div>
+                    <span class="eyebrow">Description</span>
+                    <p class="feedback-detail-text">@_selected.Description</p>
+                </div>
+
+                <div>
+                    <span class="eyebrow">Page / feature</span>
+                    <p>@(_selected.PageOrFeature ?? "Not provided")</p>
+                </div>
+
+                <div>
+                    <span class="eyebrow">Contact email</span>
+                    <p>@(_selected.ContactEmail ?? "Not provided")</p>
+                </div>
+
+                <div>
+                    <span class="eyebrow">Account email</span>
+                    <p>@(_selected.UserEmail ?? "Not signed in")</p>
+                </div>
+
+                <div>
+                    <span class="eyebrow">Diagnostics</span>
+                    <pre class="feedback-diagnostics">@(string.IsNullOrWhiteSpace(_selected.Diagnostics) ? "Not included" : _selected.Diagnostics)</pre>
+                </div>
+
+                <div>
+                    <span class="eyebrow">Created</span>
+                    <p>@_selected.CreatedAt.LocalDateTime.ToString("f")</p>
+                </div>
+
+                <div class="contact-actions">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="_saving" OnClick="SaveStatusAsync">
+                        @(_saving ? "Saving…" : "Save status")
+                    </MudButton>
+                </div>
+            </section>
+        }
+    }
+    </div>
+</MudContainer>

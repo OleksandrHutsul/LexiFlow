@@ -1,0 +1,54 @@
+@page "/profile"
+@attribute [Authorize]
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="screen">
+    <section class="page-header reveal">
+        <span class="eyebrow">Profile</span>
+        <h1>Preferences for your flow.</h1>
+        <p>Local-first settings today, ready for account sync later.</p>
+    </section>
+
+    <MudForm Class="glass-card profile-form reveal">
+        <MudSwitch T="bool"
+                   @bind-Value="_settings.DarkMode"
+                   Label="Dark theme"
+                   Color="Color.Primary" />
+
+        <MudSlider T="int"
+                   @bind-Value="_settings.DailyGoal"
+                   Min="1"
+                   Max="50"
+                   Step="1"
+                   Color="Color.Secondary"
+                   Immediate="true">
+            Daily goal: @_settings.DailyGoal words
+        </MudSlider>
+
+        <MudSelect T="string"
+                   @bind-Value="_settings.DefaultPronunciation"
+                   Label="Default pronunciation"
+                   Variant="Variant.Outlined">
+            <MudSelectItem T="string" Value="@("US")">US</MudSelectItem>
+            <MudSelectItem T="string" Value="@("UK")">UK</MudSelectItem>
+        </MudSelect>
+
+        <MudSwitch T="bool"
+                   @bind-Value="_settings.AutoPlayPronunciation"
+                   Label="Auto play pronunciation"
+                   Color="Color.Secondary" />
+
+        @if (_errors.Count > 0)
+        {
+            <MudAlert Severity="Severity.Error">
+                @string.Join(" ", _errors)
+            </MudAlert>
+        }
+
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   Disabled="_saving"
+                   OnClick="SaveAsync">
+            @(_saving ? "Saving…" : "Save preferences")
+        </MudButton>
+    </MudForm>
+</MudContainer>

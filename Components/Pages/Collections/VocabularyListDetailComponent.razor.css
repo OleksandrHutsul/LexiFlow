@@ -1,0 +1,228 @@
+.lists-screen {
+    display: grid;
+    gap: 1rem;
+}
+
+.lists-screen > .page-header {
+    margin-bottom: 0;
+}
+
+.list-workspace {
+    display: grid;
+    grid-template-columns: minmax(280px, .8fr) minmax(0, 1.2fr);
+    gap: 1rem;
+    align-items: start;
+}
+
+.vocab-hero h1 {
+    font-size: clamp(2rem, 5vw, 4.2rem);
+}
+
+.word-list,
+.share-box {
+    display: grid;
+    gap: .65rem;
+}
+
+.word-list-row,
+.share-row,
+.read-only-panel {
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+    padding: .75rem;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--mud-palette-surface) 66%, transparent);
+}
+
+.share-box h3,
+.read-only-panel h3 {
+    margin: 0;
+}
+
+.word-list-row small,
+.share-row small {
+    color: var(--mud-palette-text-secondary);
+}
+
+.word-list-row a {
+    font-size: 1.08rem;
+    font-weight: 800;
+}
+
+.word-list-row small,
+.share-row .level-pill {
+    margin-left: auto;
+}
+
+.word-list-row > div {
+    display: grid;
+    flex: 1;
+}
+
+.word-list-row > div small {
+    margin-left: 0;
+}
+
+.share-row > div {
+    display: grid;
+    gap: .12rem;
+    min-width: 0;
+}
+
+.share-row small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.read-only-panel {
+    align-items: flex-start;
+}
+
+.dictionary-picker {
+    position: relative;
+    display: grid;
+    gap: .45rem;
+}
+
+.suggestion-list {
+    position: absolute;
+    z-index: 20;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: 300px;
+    overflow: auto;
+    padding: .35rem;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--mud-palette-surface);
+    box-shadow: var(--shadow);
+}
+
+.suggestion-list button {
+    display: grid;
+    width: 100%;
+    gap: .2rem;
+    padding: .75rem;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--mud-palette-text-primary);
+    text-align: left;
+    cursor: pointer;
+}
+
+.suggestion-list button:hover {
+    background: color-mix(in srgb, var(--mud-palette-primary) 12%, transparent);
+}
+
+.suggestion-list span {
+    color: var(--mud-palette-text-secondary);
+}
+
+.study-panel {
+    max-width: 820px;
+    width: 100%;
+    margin-inline: auto;
+}
+
+.answer-review {
+    display: grid;
+    width: 100%;
+    gap: .2rem;
+    padding: .7rem;
+    border-left: 4px solid;
+    text-align: left;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--mud-palette-surface) 75%, transparent);
+}
+
+.answer-review.correct {
+    border-color: var(--mud-palette-success);
+}
+
+.answer-review.incorrect {
+    border-color: var(--mud-palette-error);
+}
+
+.archived {
+    opacity: .72;
+    filter: saturate(.65);
+}
+
+.quiz-card,
+.result-card {
+    display: grid;
+    gap: 1rem;
+}
+
+.result-card {
+    text-align: center;
+    justify-items: center;
+}
+
+.quiz-options,
+.review-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: .8rem;
+    margin-top: 1rem;
+}
+
+.flashcard {
+    height: 420px;
+    perspective: 1200px;
+    cursor: pointer;
+}
+
+.flashcard-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform .62s cubic-bezier(.2, .8, .2, 1);
+    transform-style: preserve-3d;
+}
+
+.flashcard.flipped .flashcard-inner {
+    transform: rotateY(180deg);
+}
+
+.flashcard-face {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 1rem;
+    padding: 2rem;
+    border: 1px solid var(--line);
+    border-radius: 28px;
+    background: linear-gradient(145deg, rgba(124,92,255,.24), rgba(255,255,255,.06));
+    backface-visibility: hidden;
+    box-shadow: var(--shadow);
+}
+
+.flashcard-face h2 {
+    font-size: clamp(2.5rem, 8vw, 5.5rem);
+}
+
+.flashcard-back {
+    transform: rotateY(180deg);
+    background: linear-gradient(145deg, rgba(53,211,157,.22), rgba(255,255,255,.06));
+}
+
+@media (max-width: 1100px) {
+    .list-workspace {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 760px) {
+    .flashcard {
+        height: 340px;
+    }
+}

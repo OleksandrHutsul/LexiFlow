@@ -1,0 +1,30 @@
+﻿@page "/Error"
+@using LexiFlow.Components.Shared.UI
+
+<PageTitle>Error · LexiFlow</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="screen legal-screen">
+    <section class="page-header reveal">
+        <span class="eyebrow">Error</span>
+        <h1>Something went wrong.</h1>
+        <p>An unexpected error occurred while processing your request.</p>
+    </section>
+
+    <section class="glass-card reveal">
+        <EmptyStateComponent Title="We couldn't complete that request"
+                             Text="Please try again. If the problem continues, you can report it and include the request ID below." />
+
+        @if (ShowRequestId)
+        {
+            <p class="muted">
+                <strong>Request ID:</strong>
+                <code>@_requestId</code>
+            </p>
+        }
+
+        <div class="contact-actions">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/">Go home</MudButton>
+            <MudButton Variant="Variant.Outlined" Href="/contact?type=Bug">Report a bug</MudButton>
+        </div>
+    </section>
+</MudContainer>

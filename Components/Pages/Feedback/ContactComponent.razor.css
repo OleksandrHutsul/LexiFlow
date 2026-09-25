@@ -1,0 +1,12 @@
+.contact-form-card,
+.contact-card {
+    display: grid;
+    gap: .85rem;
+}
+
+.contact-social {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .65rem;
+    align-items: center;
+}

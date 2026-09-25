@@ -1,0 +1,65 @@
+@page "/favorites"
+@using LexiFlow.Components.Shared.UI
+@attribute [Authorize]
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="screen">
+    <section class="page-header reveal">
+        <span class="eyebrow">Favorites</span>
+        <h1>Your personal word shelf.</h1>
+
+        <MudTextField @bind-Value="_filter"
+                      Placeholder="Search favorites"
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Rounded.Search"
+                      Immediate="true"
+                      Class="soft-input" />
+    </section>
+
+    @if (_loading)
+    {
+        <div class="word-skeleton reveal">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    }
+    else
+    {
+        var filteredFavorites = GetFilteredFavorites();
+
+        @if (filteredFavorites.Count == 0)
+        {
+            <EmptyStateComponent Title="No favorites found"
+                                 Text="Bookmark words from the dictionary page and they will land here."
+                                 ActionHref="/dictionary"
+                                 ActionText="Search dictionary" />
+        }
+        else
+        {
+            <Virtualize Items="filteredFavorites" Context="entry">
+                @{
+                    var meaning = GetFirstMeaning(entry);
+                }
+
+                <div class="favorite-card reveal">
+                    <div>
+                        <span class="level-pill">
+                            @(!string.IsNullOrWhiteSpace(meaning?.CefrLevel) ? meaning.CefrLevel : "Word")
+                        </span>
+
+                        <h2>@entry.Word</h2>
+
+                        <p>@meaning?.Definition</p>
+                    </div>
+
+                    <MudButton Href="@($"/dictionary?word={Uri.EscapeDataString(entry.Word)}")"
+                               Variant="Variant.Filled"
+                               Color="Color.Primary">
+                        Open
+                    </MudButton>
+                </div>
+            </Virtualize>
+        }
+    }
+</MudContainer>

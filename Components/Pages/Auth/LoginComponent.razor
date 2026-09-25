@@ -1,0 +1,65 @@
+@page "/login"
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="screen auth-screen">
+    <section class="auth-card reveal">
+        <div class="auth-copy">
+            <span class="eyebrow">Welcome back</span>
+            <h1>Continue your vocabulary flow.</h1>
+            <p>Sign in to keep your favorites, learning collections, flashcards, and progress connected.</p>
+        </div>
+
+        <MudForm Class="auth-form">
+            <MudTextField @bind-Value="_model.Email"
+                          Label="Email"
+                          Class="login-email-field"
+                          ShrinkLabel="true"
+                          InputType="InputType.Email"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Rounded.Mail"
+                          Immediate="true" />
+
+            <MudTextField @bind-Value="_model.Password"
+                          Label="Password"
+                          Class="login-password-field"
+                          ShrinkLabel="true"
+                          InputType="@PasswordInputType"
+                          Adornment="Adornment.End"
+                          AdornmentIcon="@PasswordIcon"
+                          OnAdornmentClick="TogglePassword"
+                          Immediate="true" />
+
+            <MudCheckBox T="bool"
+                         @bind-Value="_model.RememberMe"
+                         Label="Remember me"
+                         Color="Color.Primary" />
+
+            @if (_errors.Count > 0)
+            {
+                <MudAlert Severity="Severity.Error" Variant="Variant.Outlined">
+                    @string.Join(" ", _errors)
+                </MudAlert>
+            }
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       Size="Size.Large"
+                       FullWidth="true"
+                       Disabled="_isBusy"
+                       OnClick="SubmitAsync">
+                @if (_isBusy)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                    <span>Signing in...</span>
+                }
+                else
+                {
+                    <span>Login</span>
+                }
+            </MudButton>
+
+            <p class="auth-switch">
+                New to LexiFlow? <MudLink Href="/register">Create an account</MudLink>
+            </p>
+        </MudForm>
+    </section>
+</MudContainer>

@@ -1,0 +1,70 @@
+@page "/statistics"
+@using LexiFlow.Components.Shared.UI
+@attribute [Authorize]
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="screen">
+    <div class="statistics-screen">
+    <section class="page-header reveal">
+        <span class="eyebrow">Statistics</span>
+        <h1>Readable progress, not noisy dashboards.</h1>
+    </section>
+
+    <section class="metric-grid" aria-busy="@_loading">
+        <MetricCardComponent Label="Learned words"
+                    Value="@FormatValue(_stats.LearnedWords)"
+                    Caption="Across collections"
+                    Icon="@Icons.Material.Rounded.AutoStories" />
+
+        <MetricCardComponent Label="Mastered"
+                    Value="@FormatValue(_stats.MasteredWords)"
+                    Caption="Long-term memory"
+                    Icon="@Icons.Material.Rounded.Verified"
+                    Accent="#35d39d" />
+
+        <MetricCardComponent Label="Quiz accuracy"
+                    Value="@(_loading ? "–" : _stats.Accuracy.ToString("P0"))"
+                    Caption="Practice results"
+                    Icon="@Icons.Material.Rounded.TrackChanges"
+                    Accent="#ffb020" />
+
+        <MetricCardComponent Label="Streak"
+                    Value="@(_loading ? "–" : $"{_stats.Streak} days")"
+                    Caption="Daily consistency"
+                    Icon="@Icons.Material.Rounded.LocalFireDepartment"
+                    Accent="#ff5c8a" />
+    </section>
+
+    <div class="dashboard-grid">
+        <section class="glass-card reveal">
+            <h2>Weekly progress</h2>
+
+            <div class="chart-bars">
+                @foreach (var item in Weekly)
+                {
+                    <div>
+                        <span style="height:@item.Value%"></span>
+                        <small>@item.Label</small>
+                    </div>
+                }
+            </div>
+        </section>
+
+        <section class="glass-card reveal">
+            <h2>Difficult words</h2>
+
+            @foreach (var word in _stats.DifficultWords)
+            {
+                <div class="learning-row">
+                    <span>@word.Word</span>
+                    <MudChip T="string" Size="Size.Small">@word.State</MudChip>
+                </div>
+            }
+
+            @if (_stats.DifficultWords.Count == 0)
+            {
+                <p class="muted">Difficult words will appear after reviews.</p>
+            }
+        </section>
+    </div>
+    </div>
+</MudContainer>

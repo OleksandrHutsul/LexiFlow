@@ -1,0 +1,14 @@
+.password-meter {
+    height: 8px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--mud-palette-text-primary) 8%, transparent);
+}
+
+    .password-meter span {
+        display: block;
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #ff5c8a, #ffb020, #35d39d);
+        transition: width .2s ease;
+    }

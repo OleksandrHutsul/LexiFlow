@@ -1,0 +1,22 @@
+@using LexiFlow.Components.Shared.Auth
+
+<CascadingAuthenticationState>
+    <Router AppAssembly="typeof(Program).Assembly">
+        <Found Context="routeData">
+            <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
+                <NotAuthorized>
+                    <RedirectToLoginComponent />
+                </NotAuthorized>
+                <Authorizing>
+                    <MudContainer MaxWidth="MaxWidth.Small" Class="screen">
+                        <div class="glass-card auth-loading">
+                            <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+                            <span>Restoring your session...</span>
+                        </div>
+                    </MudContainer>
+                </Authorizing>
+            </AuthorizeRouteView>
+            <FocusOnNavigate RouteData="routeData" Selector="h1" />
+        </Found>
+    </Router>
+</CascadingAuthenticationState>

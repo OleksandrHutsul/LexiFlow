@@ -1,0 +1,32 @@
+.phrase-not-found {
+    display: grid;
+    gap: .85rem;
+    justify-items: start;
+}
+
+::deep .phrase-not-found .mud-icon-root {
+    font-size: 2rem;
+    color: var(--mud-palette-text-secondary);
+}
+
+.phrase-not-found h3 {
+    margin: 0;
+}
+
+.phrase-not-found-tips ul {
+    margin: .35rem 0 0;
+    padding-left: 1.2rem;
+    color: var(--mud-palette-text-secondary);
+}
+
+.phrase-alternatives {
+    display: grid;
+    gap: .55rem;
+    width: 100%;
+}
+
+.phrase-not-found-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .55rem;
+}

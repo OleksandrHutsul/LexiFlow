@@ -1,0 +1,11 @@
+<div class="empty-state">
+    <MudIcon Icon="@Icon" />
+
+    <h3>@Title</h3>
+    <p>@Text</p>
+
+    @if (!string.IsNullOrWhiteSpace(ActionHref))
+    {
+        <MudButton Href="@ActionHref" Variant="Variant.Filled" Color="Color.Primary">@ActionText</MudButton>
+    }
+</div>

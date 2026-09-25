@@ -1,0 +1,106 @@
+@page "/privacy"
+@attribute [AllowAnonymous]
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="screen legal-screen">
+    <section class="page-header reveal">
+        <span class="eyebrow">Legal</span>
+        <h1>Privacy Policy</h1>
+        <p>This policy describes how LexiFlow handles account data, learning content, photo translation, and third-party services, based on the current implementation.</p>
+        <p class="muted">Last updated: 1 September 2026</p>
+    </section>
+
+    <article class="glass-card legal-article reveal">
+        <h2>1. Who we are</h2>
+        <p>
+            LexiFlow is developed by <strong>@Contact.DeveloperName</strong>.
+            For privacy questions or deletion requests, email
+            <a href="@($"mailto:{Contact.Email}")">@Contact.Email</a>.
+        </p>
+
+        <h2>2. Account information</h2>
+        <p>When you register, LexiFlow stores the following in its application database (PostgreSQL):</p>
+        <ul>
+            <li>email address;</li>
+            <li>username;</li>
+            <li>password hash (not your plain-text password);</li>
+            <li>account creation time and last login time.</li>
+        </ul>
+        <p>Authentication tokens used by the browser session are stored in your browser’s local storage so you can stay signed in.</p>
+
+        <h2>3. Learning data, Favorites, lists, and settings</h2>
+        <p>Depending on the feature, LexiFlow stores data either in the application database or in your browser:</p>
+        <ul>
+            <li><strong>Favorites</strong> — stored in your browser’s local storage on the device you use.</li>
+            <li><strong>Profile settings</strong> (for example dark mode, daily goal, pronunciation preference) — stored in browser local storage.</li>
+            <li><strong>Practice / statistics activity</strong> (answers, study time, active days) — stored in browser local storage.</li>
+            <li><strong>Learning collections and learning words</strong> — stored in the LexiFlow database and associated with your account.</li>
+            <li><strong>Custom vocabulary lists, shared-list permissions, list test results, and in-app notifications</strong> — stored in the LexiFlow database and associated with your account.</li>
+            <li><strong>Cached dictionary headwords</strong> — the API may keep a server-side cache of looked-up words to improve performance. This cache is not your personal notebook; it is operational lookup data.</li>
+        </ul>
+        <p>LexiFlow does not currently offer an automated full-account wipe button. To request deletion of account-linked database data, contact the developer at the email above.</p>
+
+        <h2>4. Photo / OCR translation</h2>
+        <p>When you use Photo Translate:</p>
+        <ul>
+            <li>your uploaded image is sent from the LexiFlow client to the LexiFlow API for processing;</li>
+            <li>the LexiFlow API forwards the image to a third-party OCR provider (<a href="https://ocr.space" target="_blank" rel="noopener noreferrer">OCR.space</a>) to extract text;</li>
+            <li>recognized text is then sent to third-party translation providers (currently MyMemory, with a fallback translation endpoint when needed) to produce Ukrainian text;</li>
+            <li>LexiFlow does <strong>not</strong> persist uploaded images as files in its own database or file store; images are processed in memory/stream for the request and are not retained by LexiFlow after the request completes.</li>
+        </ul>
+
+        <p>
+            Recognized text and translations may remain visible in your current browser session while you use the page.
+            Third-party OCR and translation providers receive the image or text required to fulfill the request and process it according to their own terms and retention practices, which LexiFlow does not control.
+        </p>
+
+        <h2>5. Dictionary lookups</h2>
+        <p>
+            When you look up a word or phrase, LexiFlow’s API requests dictionary content from third-party dictionary sources (currently Cambridge Dictionary pages) and may request Ukrainian glosses from related Cambridge English–Ukrainian pages.
+            The lookup term you enter is transmitted to those sources as part of retrieving the entry.
+        </p>
+
+        <h2>6. Third-party services</h2>
+        <p>Depending on the feature you use, the following third parties may receive data:</p>
+        <ul>
+            <li><strong>Cambridge Dictionary / Cambridge University Press &amp; Assessment</strong> — dictionary page content and related lexical material for lookups.</li>
+            <li><strong>OCR.space</strong> — uploaded images for text recognition.</li>
+            <li><strong>MyMemory</strong> and, when needed, a translation fallback endpoint — text for machine translation.</li>
+        </ul>
+        <p>Those services are outside LexiFlow’s hosting environment. Review their privacy policies for details about their processing.</p>
+
+        <h2>7. Dictionary content attribution</h2>
+        <p>LexiFlow distinguishes between:</p>
+        <ul>
+            <li><strong>Application functionality and user-generated data</strong> — accounts, Favorites, Learning collections, custom lists, settings, reports, and similar product data created or saved by users or by LexiFlow itself.</li>
+            <li><strong>Dictionary / licensed lexical content</strong> — definitions, pronunciations, examples, related forms, and similar entry content retrieved for display.</li>
+            <li><strong>Other third-party processing</strong> — OCR and machine translation services used by Photo Translate.</li>
+        </ul>
+
+        <p>
+            Dictionary definitions, pronunciations, example sentences, translations, and related lexical content shown in LexiFlow may originate from or depend on
+            <a href="https://dictionary.cambridge.org" target="_blank" rel="noopener noreferrer">Cambridge Dictionary</a>
+            (Cambridge University Press &amp; Assessment). Material on Cambridge Dictionary pages is copyright Cambridge University Press or reproduced with permission from other copyright owners.
+            Cambridge Dictionary and related names and marks are trademarks of Cambridge University Press &amp; Assessment.
+            LexiFlow is an independent learning application and is not affiliated with, sponsored by, or endorsed by Cambridge University Press &amp; Assessment.
+        </p>
+
+        <p>
+            <strong>Oxford Languages / Oxford University Press:</strong> LexiFlow does not currently integrate an Oxford Dictionary API or Oxford-licensed dataset.
+            If Oxford content is added in the future, this policy will be updated with the attribution, trademark, and copyright wording required by that specific license or API.
+        </p>
+
+        <h2>8. Cookies and local storage</h2>
+        <p>
+            LexiFlow uses browser local storage (and related client storage) for authentication tokens, Favorites, settings, and local practice statistics.
+            Authentication also uses standard cookie-based session support in the Blazor host where configured.
+        </p>
+
+        <h2>9. Contact and deletion requests</h2>
+        <p>
+            For privacy questions, access requests, or deletion requests regarding account-linked data stored by LexiFlow, contact
+            <strong>@Contact.DeveloperName</strong> at
+            <a href="@($"mailto:{Contact.Email}")">@Contact.Email</a>.
+            You can also use the <a href="/contact">Contact / Report a Bug</a> page for product issues.
+        </p>
+    </article>
+</MudContainer>

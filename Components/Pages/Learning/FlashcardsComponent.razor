@@ -1,0 +1,98 @@
+@page "/flashcards"
+@using LexiFlow.Components.Shared.Learning
+@using LexiFlow.Components.Shared.UI
+@using LexiFlow.Enums.LearningEnums
+@attribute [Authorize]
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="screen practice-screen">
+    <section class="page-header reveal">
+        <span class="eyebrow">Flashcards</span>
+        <h1>@(string.IsNullOrWhiteSpace(_collectionName) ? "Study your words." : _collectionName)</h1>
+        <p>Mark what you still need to learn, and what you already know.</p>
+
+        @if (CollectionId is not null)
+        {
+            <div>
+                <MudButton Href="@($"/learning/{CollectionId}")"
+                           Variant="Variant.Outlined"
+                           StartIcon="@Icons.Material.Rounded.ArrowBack">
+                    Back to collection
+                </MudButton>
+            </div>
+        }
+    </section>
+
+    @if (_loading)
+    {
+        <div class="skeleton-list">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    }
+    else if (_allWords.Count == 0)
+    {
+        <EmptyStateComponent Title="No cards yet"
+                    Text="@(CollectionId is null ? "Add words to learning from the dictionary page first." : "This collection has no words to study yet.")"
+                    ActionHref="@(CollectionId is null ? "/dictionary" : $"/learning/{CollectionId}")"
+                    ActionText="@(CollectionId is null ? "Add words" : "Back to collection")" />
+    }
+    else
+    {
+        <div class="study-focus">
+            <MudButton Variant="@(_focus == StudyFocus.ToLearn ? Variant.Filled : Variant.Outlined)"
+                       Color="Color.Primary"
+                       Size="Size.Small"
+                       OnClick="() => SetFocus(StudyFocus.ToLearn)">
+                To learn (@ToLearnCount)
+            </MudButton>
+
+            <MudButton Variant="@(_focus == StudyFocus.All ? Variant.Filled : Variant.Outlined)"
+                       Size="Size.Small"
+                       OnClick="() => SetFocus(StudyFocus.All)">
+                All words (@_allWords.Count)
+            </MudButton>
+        </div>
+
+        @if (_words.Count == 0)
+        {
+            <EmptyStateComponent Title="Nothing left to learn"
+                        Text="Every word in this set is marked as learned. Switch to All words, or add new vocabulary." />
+        }
+        else
+        {
+            <FlashcardViewComponent @key="_words[_index].Id" Word="_words[_index]" />
+
+            <div class="review-actions">
+                <div class="review-action">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Error"
+                               OnClick="() => MarkAsync(LearningState.New)">
+                        Again
+                    </MudButton>
+                    <small>Don’t know yet</small>
+                </div>
+
+                <div class="review-action">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Warning"
+                               OnClick="() => MarkAsync(LearningState.Learning)">
+                        Learning
+                    </MudButton>
+                    <small>Still studying</small>
+                </div>
+
+                <div class="review-action">
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Success"
+                               OnClick="() => MarkAsync(LearningState.Mastered)">
+                        Learned
+                    </MudButton>
+                    <small>I know this</small>
+                </div>
+            </div>
+
+            <p class="muted center">@(_index + 1) / @_words.Count</p>
+        }
+    }
+</MudContainer>

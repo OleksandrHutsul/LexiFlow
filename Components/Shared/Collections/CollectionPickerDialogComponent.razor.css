@@ -1,0 +1,34 @@
+.collection-picker-list {
+    display: grid;
+    gap: .65rem;
+}
+
+.collection-picker-option {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: .75rem;
+    align-items: center;
+    width: 100%;
+    padding: .8rem;
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--accent);
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--mud-palette-surface) 72%, var(--mud-palette-background));
+    color: var(--mud-palette-text-primary);
+    text-align: left;
+    cursor: pointer;
+}
+
+.collection-picker-option:hover {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 10%, var(--mud-palette-surface));
+}
+
+.collection-picker-option span {
+    display: grid;
+    min-width: 0;
+}
+
+.collection-picker-option small {
+    color: var(--mud-palette-text-secondary);
+}

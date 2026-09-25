@@ -1,0 +1,15 @@
+<div class="flashcard @(_flipped ? "flipped" : "")" @onclick="Flip" tabindex="0">
+    <div class="flashcard-inner">
+        <div class="flashcard-face">
+            <small>@Word.CollectionName · @StateLabel</small>
+            <h2>@Word.Word</h2>
+            <p>Tap to reveal</p>
+        </div>
+
+        <div class="flashcard-face flashcard-back">
+            <small>@Word.Level</small>
+            <h2>@(Word.Translation ?? "Definition")</h2>
+            <p>@Word.Definition</p>
+        </div>
+    </div>
+</div>

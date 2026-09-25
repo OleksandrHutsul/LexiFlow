@@ -1,0 +1,525 @@
+@page "/photo-translate"
+@using LexiFlow.Components.Shared.Dictionary
+@using LexiFlow.Components.Shared.UI
+@using LexiFlow.Enums.TranslationEnums
+@attribute [Authorize]
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="screen">
+    <div class="photo-screen">
+    <section class="page-header reveal">
+        <span class="eyebrow">Photo Translate</span>
+        <h1>Turn any image into a lesson.</h1>
+        <p>Translate recognized English text into Ukrainian, or build a translated word list.</p>
+    </section>
+
+    <section class="photo-toolbar list-panel reveal">
+        <div class="photo-mode-picker">
+            <strong>Translation mode</strong>
+
+            <MudRadioGroup T="PhotoTranslationMode" Value="_mode" ValueChanged="ChangeMode">
+                <MudRadio T="PhotoTranslationMode" Value="@PhotoTranslationMode.Text" Disabled="_processing">
+                    Text
+                </MudRadio>
+
+                <MudRadio T="PhotoTranslationMode" Value="@PhotoTranslationMode.WordList" Disabled="_processing">
+                    Word List
+                </MudRadio>
+            </MudRadioGroup>
+
+            <small>
+                @(_mode == PhotoTranslationMode.Text
+                                ? "Recognize and translate the complete text."
+                                : "Recognize unique English words and translate each one.")
+            </small>
+        </div>
+
+        <label class="photo-drop-zone @(_dragging ? "dragging" : "") @(_processing ? "processing" : "")" @ref="_dropZone">
+            <InputFile OnChange="HandleFileAsync"
+                       accept="image/jpeg,image/png,image/webp"
+                       capture="environment"
+                       disabled="@_processing" />
+
+            <MudIcon Icon="@Icons.Material.Rounded.AddPhotoAlternate" />
+            <strong>@(_processing ? "Processing image…" : "Drop or choose an image")</strong>
+            <span class="photo-choose-button">@(_processing ? "Working…" : "Choose image")</span>
+            <span>JPG, PNG, or WebP · up to 10 MB</span>
+            <small>On mobile, choose Camera to take a photo. You can also paste an image anywhere on this page.</small>
+        </label>
+    </section>
+
+    @if (_processing)
+    {
+        <section class="photo-loading list-panel" aria-live="polite" aria-busy="true">
+            <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+
+            <div class="skeleton-list">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+
+            <p>
+                @(_mode == PhotoTranslationMode.Text
+                            ? "Recognizing and translating the full text…"
+                            : "Recognizing and translating the word list…")
+        </p>
+    </section>
+        }
+    else if (!string.IsNullOrWhiteSpace(_error) && _result is null)
+    {
+        <section class="list-panel">
+            <EmptyStateComponent Title="Photo translation failed" Text="@_error" />
+        </section>
+    }
+    else if (_result is not null && string.IsNullOrWhiteSpace(_result.OriginalText))
+    {
+        <section class="list-panel">
+            <EmptyStateComponent Title="No text found" Text="Try a sharper image with clear, well-lit text." />
+        </section>
+    }
+    else if (_result is not null)
+    {
+        @if (!string.IsNullOrWhiteSpace(_result.TranslationError) || !string.IsNullOrWhiteSpace(_translationNotice))
+        {
+            <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Class="mb-4" Dense="true">
+                <div class="photo-translation-alert">
+                    <span>
+                        @(!string.IsNullOrWhiteSpace(_result.TranslationError)
+                                        ? _result.TranslationError
+                                        : _translationNotice)
+            </span>
+
+                    <MudButton Size="Size.Small"
+                               Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               Disabled="_retryingTranslation"
+                               OnClick="RetryTranslationAsync">
+                        @(_retryingTranslation ? "Retrying…" : "Retry translation")
+                    </MudButton>
+                </div>
+            </MudAlert>
+        }
+
+        @if (_mode == PhotoTranslationMode.WordList)
+        {
+            <section class="list-panel vocabulary-review reveal">
+                <div class="section-heading">
+                    <div>
+                        <span class="eyebrow">Ukrainian word list</span>
+                        <h2>Review @_reviewItems.Count unique words</h2>
+                        <p class="muted">
+                            Correct OCR mistakes, replace a word with a dictionary result, or remove anything you do not want to learn.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="review-toolbar">
+                    <MudSelect T="Guid?"
+                               @bind-Value="_selectedLearningCollectionId"
+                               Label="Learning collection"
+                               Variant="Variant.Outlined"
+                               Clearable="true">
+                        @foreach (var collection in _learningCollections)
+                        {
+                            <MudSelectItem T="Guid?" Value="@((Guid?)collection.Id)">
+                                @collection.Name @(collection.IsDefault ? "(Default)" : "")
+                            </MudSelectItem>
+                        }
+                    </MudSelect>
+
+                    <MudButton Variant="Variant.Outlined"
+                               StartIcon="@Icons.Material.Rounded.CreateNewFolder"
+                               OnClick="CreateLearningCollectionAsync">
+                        New collection
+                    </MudButton>
+                </div>
+
+                @if (_importComplete)
+                {
+                    <MudAlert Severity="Severity.Success" Variant="Variant.Outlined">
+                        Import complete. You can upload another image or keep reviewing the word list.
+                    </MudAlert>
+                }
+                else if (_reviewItems.Count == 0)
+                {
+                    <EmptyStateComponent Title="No English words found" Text="The recognized text does not contain importable English words." />
+                }
+                else
+                {
+                    <div class="vocabulary-review-list">
+                        @foreach (var item in _reviewItems)
+                        {
+                            <div class="vocabulary-review-row" @key="item.Id">
+                                @if (item.IsEditing)
+                                {
+                                    <div class="review-edit-fields">
+                                        <div class="review-word-search">
+                                            <MudTextField T="string"
+                                                          Value="@item.SearchQuery"
+                                                          ValueChanged="@(value => SearchReviewWordAsync(item, value))"
+                                                          Label="Search replacement word"
+                                                          Variant="Variant.Outlined"
+                                                          Immediate="true"
+                                                          Adornment="Adornment.Start"
+                                                          AdornmentIcon="@Icons.Material.Rounded.Search" />
+
+                                            @if (item.IsSearching)
+                                            {
+                                                <MudProgressLinear Indeterminate="true" />
+                                            }
+
+                                            @if (item.Suggestions.Count > 0)
+                                            {
+                                                <div class="review-suggestions">
+                                                    @foreach (var suggestion in item.Suggestions)
+                                                    {
+                                                        <button type="button" @onclick="() => SelectReviewSuggestionAsync(item, suggestion)">
+                                                            <strong>@suggestion.Word</strong>
+                                                            <span>
+                                                                @(suggestion.Translation ?? suggestion.Summary ?? suggestion.PartOfSpeech ?? "Dictionary entry")
+                                                            </span>
+                                                        </button>
+                                                    }
+                                                </div>
+                                            }
+
+                                            @if (item.SearchError is not null)
+                                            {
+                                                <small class="validation-message">@item.SearchError</small>
+                                            }
+                                        </div>
+
+                                        <MudTextField @bind-Value="item.Translation"
+                                                      Label="Ukrainian translation"
+                                                      Variant="Variant.Outlined"
+                                                      Immediate="true" />
+                                    </div>
+
+                                    <div class="review-row-actions">
+                                        <MudButton Variant="Variant.Filled"
+                                                   Size="Size.Small"
+                                                   OnClick="() => FinishEditing(item)">
+                                            Done
+                                        </MudButton>
+
+                                        <MudIconButton Icon="@Icons.Material.Rounded.DeleteOutline"
+                                                       Color="Color.Error"
+                                                       OnClick="() => RemoveReviewItem(item.Id)"
+                                                       aria-label="Remove word" />
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="review-word">
+                                        <strong>@item.Word</strong>
+
+                                        @if (!item.Word.Equals(item.OriginalWord, StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            <small>Detected as “@item.OriginalWord”</small>
+                                        }
+                                    </div>
+                                    
+                                    <span class="review-translation @(string.IsNullOrWhiteSpace(item.Translation) ? "translation-failed" : "")">
+                                        @(string.IsNullOrWhiteSpace(item.Translation) ? item.TranslationError ?? "Ukrainian translation unavailable." : item.Translation)
+                                    </span>
+                
+                                    <div class="review-row-actions">
+                                        <MudIconButton Icon="@Icons.Material.Rounded.Edit"
+                                                       OnClick="() => BeginEditing(item)"
+                                                       aria-label="@($"Edit {item.Word}")" />
+
+                                        <MudIconButton Icon="@Icons.Material.Rounded.DeleteOutline"
+                                                       Color="Color.Error"
+                                                       OnClick="() => RemoveReviewItem(item.Id)"
+                                                       aria-label="@($"Remove {item.Word}")" />
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+
+                    <div class="review-confirm">
+                        <span>@_reviewItems.Count words ready</span>
+
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Rounded.LibraryAdd"
+                                   Disabled="@_importing"
+                                   OnClick="ConfirmImportAsync">
+                            @(_importing ? "Adding…" : "Confirm & add words")
+                        </MudButton>
+                    </div>
+                }
+            </section>
+        }
+
+        @if (_mode == PhotoTranslationMode.Text)
+        {
+            <section class="photo-reading-layout reveal">
+                <div class="photo-text-columns">
+                    <article class="list-panel interactive-copy">
+                        <div class="section-heading">
+                            <div>
+                                <span class="eyebrow">Original</span>
+                                <h2>Recognized text</h2>
+                            </div>
+
+                            <MudTooltip Text="Tap a word, tap the next word to extend, or drag across words. No Shift key needed."
+                                        Arrow="true"
+                                        Placement="Placement.Bottom">
+                                <MudIconButton Icon="@Icons.Material.Rounded.Info"
+                                               Size="Size.Small"
+                                               Class="photo-selection-help"
+                                               aria-label="How to select words and phrases" />
+                            </MudTooltip>
+                        </div>
+
+                        <div class="recognized-text @(_pointerSelecting ? "is-selecting" : "")"
+                             @onpointermove="OnRecognizedPointerMove"
+                             @onpointerup="OnWordPointerUp"
+                             @onpointercancel="OnWordPointerUp">
+                            @foreach (var token in _tokens)
+                            {
+                                if (token.IsWord)
+                                {
+                                    <button type="button"
+                                            class="word-token @(IsTokenSelected(token) ? "selected" : "")"
+                                            data-token-index="@token.Index"
+                                            @onpointerdown="args => OnWordPointerDown(token, args)"
+                                            @onpointerenter="() => OnWordPointerEnter(token)"
+                                            @onclick="OnWordClick">
+                                        @token.Text
+                                    </button>
+                                }
+                                else
+                                {
+                                    <text>@token.Text</text>
+                                }
+                            }
+                        </div>
+                    </article>
+
+                    <article class="list-panel">
+                        <div class="section-heading">
+                            <div>
+                                <span class="eyebrow">Translation</span>
+                                <h2>Ukrainian</h2>
+                            </div>
+                        </div>
+
+                        <div class="translated-text">
+                            @if (string.IsNullOrWhiteSpace(_result.TranslatedText))
+                            {
+                                <span class="muted">
+                                    Translation unavailable. Recognized text is shown on the left — use Retry translation when ready.
+                                </span>
+                            }
+                            else
+                            {
+                                @_result.TranslatedText
+                            }
+                        </div>
+                    </article>
+                </div>
+
+                <aside class="word-inspector list-panel @(!HasSelection && string.IsNullOrWhiteSpace(_inspectorPhrase) ? "is-placeholder" : "")">
+                    @if (!HasSelection && string.IsNullOrWhiteSpace(_inspectorPhrase))
+                    {
+                        <EmptyStateComponent Title="Select a word or phrase" Text="Tap a word, tap the next word to extend, or drag across consecutive words." />
+                    }
+                    else
+                    {
+                        @if (HasSelection)
+                        {
+                            <div class="phrase-selection-bar phrase-selection-bar--inspector">
+                                <span>
+                                    Selected: <strong>@SelectedPhrase</strong>
+                                </span>
+
+                                <div class="phrase-selection-actions">
+                                    <MudButton Size="Size.Small"
+                                               Variant="Variant.Outlined"
+                                               Disabled="@(SelectedWordCount < 2 || _wordLoading)"
+                                               OnClick="ShrinkSelectionAsync">
+                                        Remove last
+                                    </MudButton>
+
+                                    <MudButton Size="Size.Small"
+                                               Variant="Variant.Text"
+                                               Disabled="_wordLoading"
+                                               OnClick="CloseInspector">
+                                        Clear
+                                    </MudButton>
+                                </div>
+                            </div>
+                        }
+
+                        @if (_wordLoading)
+                        {
+                            <MudProgressLinear Indeterminate="true" />
+
+                            <div class="word-skeleton">
+                                <span></span>
+                                <span></span>
+                            </div>
+                        }
+                        else if (_phraseMiss)
+                        {
+                            <PhraseNotFoundComponent Phrase="@InspectorPhrase"
+                                                     Title="@(SelectedWordCount > 1 || InspectorPhrase.Contains(' ') ? "Phrase not found" : "Word not found")">
+                                <MudButton Variant="Variant.Outlined"
+                                           StartIcon="@Icons.Material.Rounded.Close"
+                                           OnClick="CloseInspector">
+                                    Clear selection
+                                </MudButton>
+                            </PhraseNotFoundComponent>
+                        }
+                        else if (_selectedEntry is not null)
+                        {
+                            <div class="dictionary-entry">
+                            @if (_lookupSuggestions.Count > 0)
+                            {
+                                <MudButton Class="inspector-back"
+                                           Size="Size.Small"
+                                           Variant="Variant.Text"
+                                           StartIcon="@Icons.Material.Rounded.ArrowBack"
+                                           OnClick="ReturnToSuggestions">
+                                    Back to suggestions
+                                </MudButton>
+                            }
+
+                            <div class="section-heading">
+                                <div>
+                                    <span class="eyebrow">@(InspectorPhrase.Contains(' ') ? "Phrase" : "Word")</span>
+                                    <h2>@_selectedEntry.Word</h2>
+                                </div>
+                            </div>
+
+                            @if (!string.Equals(InspectorPhrase, _selectedEntry.Word, StringComparison.OrdinalIgnoreCase))
+                            {
+                                <p class="muted phrase-canonical-hint">
+                                    From “@InspectorPhrase”
+                                </p>
+                            }
+
+                            <h3>@(_selectedEntry.Translations.FirstOrDefault()?.Text ?? "Ukrainian translation unavailable")</h3>
+
+                            <span class="level-pill">
+                                @(_selectedEntry.Meanings.FirstOrDefault()?.PartOfSpeech ?? "Part of speech unavailable")
+                            </span>
+
+                            <div class="pronunciation-list">
+                                @foreach (var pronunciation in _selectedEntry.Pronunciations)
+                                {
+                                    <MudButton Variant="Variant.Outlined"
+                                               StartIcon="@Icons.Material.Rounded.VolumeUp"
+                                               Disabled="@string.IsNullOrWhiteSpace(pronunciation.AudioUrl)"
+                                               OnClick="() => PlayAsync(pronunciation.AudioUrl)">
+                                        @pronunciation.Dialect @pronunciation.Ipa
+                                    </MudButton>
+                                }
+                            </div>
+
+                            <div class="word-status">
+                                <span class="@(_isFavorite ? "active" : "")">
+                                    @(_isFavorite ? "In Favorites" : "Not in Favorites")
+                                </span>
+
+                                <span class="@(_inLearning ? "active" : "")">
+                                    @(_inLearning ? "In Learning" : "Not in Learning")
+                                </span>
+
+                                @foreach (var list in _wordLists)
+                                {
+                                    <span class="active">In @list</span>
+                                }
+                            </div>
+
+                            <div class="inspector-actions">
+                                <MudButton Variant="Variant.Filled"
+                                           StartIcon="@Icons.Material.Rounded.OpenInNew"
+                                           OnClick="OpenWord">
+                                    Open word page
+                                </MudButton>
+
+                                <MudButton Variant="Variant.Outlined"
+                                           StartIcon="@Icons.Material.Rounded.BookmarkAdd"
+                                           Disabled="_isFavorite"
+                                           OnClick="AddFavoriteAsync">
+                                    Add to Favorites
+                                </MudButton>
+
+                                <MudButton Variant="Variant.Outlined"
+                                           StartIcon="@Icons.Material.Rounded.School"
+                                           Disabled="_inLearning"
+                                           OnClick="AddLearningAsync">
+                                    Add to Learning
+                                </MudButton>
+                            </div>
+
+                            <div class="add-list-control">
+                                <MudSelect T="Guid?"
+                                           @bind-Value="_selectedListId"
+                                           Label="Add to one of your lists"
+                                           Variant="Variant.Outlined">
+                                    @foreach (var list in _ownedLists)
+                                    {
+                                        <MudSelectItem T="Guid?"
+                                                       Value="@((Guid?)list.Id)"
+                                                       Disabled="@_wordLists.Contains(list.Name)">
+                                            @list.Name
+                                        </MudSelectItem>
+                                    }
+                                </MudSelect>
+
+                                <MudButton Variant="Variant.Filled"
+                                           Disabled="@(_selectedListId is null || _addingToList)"
+                                           OnClick="AddToListAsync">
+                                    Add
+                                </MudButton>
+                            </div>
+                            </div>
+                        }
+                        else if (_lookupSuggestions.Count > 0)
+                        {
+                            <div class="section-heading">
+                                <div>
+                                    <span class="eyebrow">Phrase</span>
+                                    <h2>@_resolvedQuery</h2>
+                                </div>
+                            </div>
+
+                            @if (!string.Equals(InspectorPhrase, _resolvedQuery, StringComparison.OrdinalIgnoreCase))
+                            {
+                                <p class="muted phrase-canonical-hint">
+                                    From “@InspectorPhrase”
+                                </p>
+                            }
+
+                            <p class="muted">
+                                This phrase has several dictionary entries.
+                                Choose the one that best matches the context.
+                            </p>
+
+                            <div class="phrase-suggestions">
+                                <strong class="eyebrow">Possible matches</strong>
+
+                                @foreach (var suggestion in _lookupSuggestions)
+                                {
+                                    <button type="button" @onclick="() => SelectSuggestionAsync(suggestion)">
+                                        @suggestion.Word
+                                    </button>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <EmptyStateComponent Title="Release to look up" Text="Finish selecting, then dictionary details will appear here." />
+                        }
+                    }
+                </aside>
+            </section>
+        }
+    }
+    </div>
+</MudContainer>

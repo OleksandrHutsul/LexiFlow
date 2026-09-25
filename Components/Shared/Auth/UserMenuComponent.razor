@@ -1,0 +1,23 @@
+<AuthorizeView>
+    <Authorized Context="auth">
+        <MudMenu AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
+            <ActivatorContent>
+                <button class="user-menu-button" type="button" aria-label="Open user menu">
+                    <span>@GetInitials(auth.User.Identity?.Name)</span>
+                </button>
+            </ActivatorContent>
+
+            <ChildContent>
+                <MudMenuItem Disabled="true">
+                    <div class="user-menu-heading">
+                        <strong>@auth.User.Identity?.Name</strong>
+                        <small>@auth.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value</small>
+                    </div>
+                </MudMenuItem>
+
+                <MudMenuItem Href="/profile" Icon="@Icons.Material.Rounded.Person">Profile</MudMenuItem>
+                <MudMenuItem Icon="@Icons.Material.Rounded.Logout" OnClick="LogoutAsync">Logout</MudMenuItem>
+            </ChildContent>
+        </MudMenu>
+    </Authorized>
+</AuthorizeView>

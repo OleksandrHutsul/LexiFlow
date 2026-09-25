@@ -1,0 +1,64 @@
+@page "/quiz"
+@using LexiFlow.Components.Shared.UI
+@attribute [Authorize]
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="screen">
+    <section class="page-header reveal">
+        <span class="eyebrow">Quiz</span>
+        <h1>Practice from your own words.</h1>
+        <p>Multiple choice, translation, definition, and completion modes are represented in one lightweight quiz engine.</p>
+    </section>
+
+    @if (_loading)
+    {
+        <div class="skeleton-list">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    }
+    else if (_questions.Count == 0)
+    {
+        <EmptyStateComponent Title="No quiz material"
+                    Text="Words with definitions or translations become quiz questions."
+                    ActionHref="/dictionary"
+                    ActionText="Collect words" />
+    }
+    else if (_finished)
+    {
+        <section class="glass-card result-card reveal">
+            <MudIcon Icon="@Icons.Material.Rounded.EmojiEvents" />
+            <h2>@_correct / @_questions.Count correct</h2>
+            <p>Accuracy: @(((double)_correct / _questions.Count).ToString("P0"))</p>
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       OnClick="Restart">
+                Restart
+            </MudButton>
+        </section>
+    }
+    else
+    {
+        var question = _questions[_index];
+
+        <section class="glass-card quiz-card reveal">
+            <span class="eyebrow">@question.Type</span>
+            <h2>@question.Prompt</h2>
+
+            <div class="quiz-options">
+                @foreach (var choice in question.Choices)
+                {
+                    <MudButton Variant="Variant.Outlined"
+                               OnClick="() => AnswerAsync(choice)">
+                        @choice
+                    </MudButton>
+                }
+            </div>
+
+            <MudProgressLinear Value="@(((double)(_index + 1) / _questions.Count) * 100)"
+                               Rounded="true"
+                               Color="Color.Primary" />
+        </section>
+    }
+</MudContainer>

@@ -1,0 +1,41 @@
+<MudMenu @ref="_menu" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
+    <ActivatorContent>
+        <button class="notification-bell-button" type="button" aria-label="Open notifications" @onclick="OpenNotificationsAsync">
+            <MudIcon Icon="@Icons.Material.Rounded.Notifications" />
+
+            @if (UnreadCount > 0)
+            {
+                <span class="notification-count">@(UnreadCount > 99 ? "99+" : UnreadCount)</span>
+            }
+        </button>
+    </ActivatorContent>
+
+    <ChildContent>
+        <div class="notification-menu">
+            <div class="section-heading">
+                <h3>Notifications</h3>
+                <MudIconButton Icon="@Icons.Material.Rounded.Refresh" Size="Size.Small" OnClick="LoadAsync" />
+            </div>
+
+            @if (_loading)
+            {
+                <MudProgressLinear Indeterminate="true" />
+            }
+            else if (_items.Count == 0)
+            {
+                <p class="muted">No notifications.</p>
+            }
+            else
+            {
+                @foreach (var item in _items)
+                {
+                    <button class="notification-item @(!item.IsRead ? "unread" : "")" @onclick="() => OpenAsync(item)">
+                        <strong>@item.Title</strong>
+                        <span>@item.Message</span>
+                        <small>@item.CreatedAt.ToLocalTime().ToString("MMM d, HH:mm")</small>
+                    </button>
+                }
+            }
+        </div>
+    </ChildContent>
+</MudMenu>

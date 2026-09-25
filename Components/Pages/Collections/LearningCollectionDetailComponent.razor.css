@@ -1,0 +1,40 @@
+.collection-detail-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .7rem;
+    align-items: center;
+}
+
+.word-list {
+    display: grid;
+    gap: .65rem;
+}
+
+.word-list-row {
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+    padding: .75rem;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--mud-palette-surface) 66%, transparent);
+}
+
+.word-list-row a {
+    font-size: 1.08rem;
+    font-weight: 800;
+}
+
+.word-list-row small {
+    margin-left: auto;
+    color: var(--mud-palette-text-secondary);
+}
+
+.word-list-row > div {
+    display: grid;
+    flex: 1;
+}
+
+.word-list-row > div small {
+    margin-left: 0;
+}

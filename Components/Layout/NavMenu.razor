@@ -1,0 +1,29 @@
+<nav class="nav-menu">
+    <div class="nav-section">
+        <span>Learn</span>
+        <NavLink class="nav-link" href="" Match="NavLinkMatch.All"><MudIcon Icon="@Icons.Material.Rounded.SpaceDashboard" /> Home</NavLink>
+        <NavLink class="nav-link" href="dictionary"><MudIcon Icon="@Icons.Material.Rounded.Search" /> Dictionary</NavLink>
+        <NavLink class="nav-link" href="photo-translate"><MudIcon Icon="@Icons.Material.Rounded.DocumentScanner" /> Photo Translate</NavLink>
+        <NavLink class="nav-link" href="favorites"><MudIcon Icon="@Icons.Material.Rounded.Bookmarks" /> Favorites</NavLink>
+        <NavLink class="nav-link" href="lists"><MudIcon Icon="@Icons.Material.Rounded.FolderShared" /> Lists</NavLink>
+        <NavLink class="nav-link" href="learning"><MudIcon Icon="@Icons.Material.Rounded.School" /> Learning</NavLink>
+    </div>
+    <div class="nav-section">
+        <span>Practice</span>
+        <NavLink class="nav-link" href="flashcards"><MudIcon Icon="@Icons.Material.Rounded.Style" /> Flashcards</NavLink>
+        <NavLink class="nav-link" href="quiz"><MudIcon Icon="@Icons.Material.Rounded.Quiz" /> Quiz</NavLink>
+    </div>
+    <div class="nav-section">
+        <span>Insight</span>
+        <NavLink class="nav-link" href="statistics"><MudIcon Icon="@Icons.Material.Rounded.QueryStats" /> Statistics</NavLink>
+        <NavLink class="nav-link" href="profile"><MudIcon Icon="@Icons.Material.Rounded.Tune" /> Profile</NavLink>
+    </div>
+    <AuthorizeView Roles="Admin">
+        <Authorized>
+            <div class="nav-section">
+                <span>Developer</span>
+                <NavLink class="nav-link" href="admin/feedback"><MudIcon Icon="@Icons.Material.Rounded.BugReport" /> Feedback</NavLink>
+            </div>
+        </Authorized>
+    </AuthorizeView>
+</nav>

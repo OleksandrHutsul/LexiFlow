@@ -1,0 +1,58 @@
+.main-content-shell {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 100%;
+}
+
+.page-transition {
+    position: relative;
+    z-index: 1;
+    flex: 1 1 auto;
+    animation: pageIn .42s ease;
+}
+
+.brand {
+    display: inline-flex;
+    align-items: center;
+    gap: .7rem;
+    font-weight: 800;
+    letter-spacing: 0;
+}
+
+.brand-mark {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    place-items: center;
+    border-radius: 12px;
+    color: white;
+    background: linear-gradient(135deg, #8b7dff, #35d39d);
+    box-shadow: 0 12px 32px rgba(124, 92, 255, .35);
+}
+
+.ambient {
+    position: fixed;
+    z-index: 0;
+    width: 360px;
+    height: 360px;
+    border-radius: 999px;
+    filter: blur(70px);
+    opacity: .16;
+    pointer-events: none;
+}
+
+.ambient-one {
+    top: 10%;
+    right: 8%;
+    background: #7c5cff;
+}
+
+.ambient-two {
+    bottom: 4%;
+    left: 22%;
+    background: #35d39d;
+}

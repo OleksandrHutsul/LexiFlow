@@ -1,0 +1,30 @@
+.study-focus {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: .55rem;
+    margin-bottom: 1rem;
+}
+
+.review-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: .8rem;
+    margin-top: 1rem;
+}
+
+.review-action {
+    display: grid;
+    gap: .35rem;
+    justify-items: center;
+}
+
+.review-action small {
+    color: var(--mud-palette-text-secondary);
+    font-size: .78rem;
+}
+
+.center {
+    text-align: center;
+}

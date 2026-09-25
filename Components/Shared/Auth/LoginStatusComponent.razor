@@ -1,0 +1,22 @@
+<AuthorizeView>
+    <Authorized Context="auth">
+        <div class="auth-user-bar">
+            <span>@auth.User.Identity?.Name</span>
+
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Inherit"
+                       Size="Size.Small"
+                       StartIcon="@Icons.Material.Rounded.Logout"
+                       OnClick="LogoutAsync">
+                Logout
+            </MudButton>
+        </div>
+    </Authorized>
+
+    <NotAuthorized>
+        <div class="auth-links">
+            <MudButton Href="/login" Variant="Variant.Text" Color="Color.Inherit">Login</MudButton>
+            <MudButton Href="/register" Variant="Variant.Filled" Color="Color.Primary">Register</MudButton>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>

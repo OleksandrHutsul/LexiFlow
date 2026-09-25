@@ -1,0 +1,55 @@
+@page "/dictionary"
+@using LexiFlow.Components.Shared.Dictionary
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="screen">
+    <section class="page-header reveal">
+        <span class="eyebrow">Dictionary</span>
+        <h1>Find a word and make it yours.</h1>
+        <p>Search for a word, phrase, idiom, or phrasal verb to see its meaning, translation, examples, and pronunciation.</p>
+
+        <AppSearchComponent OnSearch="Lookup" Query="@_query" Placeholder="Type a word, idiom, or collocation" />
+
+        <div class="search-help">
+            <MudIcon Icon="@Icons.Material.Rounded.Keyboard" Size="Size.Small" />
+            <span>Use the arrow keys to move through suggestions and Enter to select.</span>
+        </div>
+    </section>
+
+    @if (_loading)
+    {
+        <div class="word-skeleton reveal">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    }
+    else if (!string.IsNullOrWhiteSpace(_error))
+    {
+        <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined">
+            @_error
+        </MudAlert>
+    }
+    else if (_notFound)
+    {
+        <section class="glass-card reveal">
+            <PhraseNotFoundComponent Phrase="@_query" Title="@(_query.Contains(' ') ? "Phrase not found" : "Word not found")" />
+        </section>
+    }
+    else if (_entry is not null)
+    {
+        <WordDetailComponent Entry="_entry" />
+    }
+    else
+    {
+        <section class="glass-card reveal dictionary-empty">
+            <MudIcon Icon="@Icons.Material.Rounded.Search" Size="Size.Large" />
+
+            <h2>Search the dictionary</h2>
+
+            <p class="muted">
+                Enter a word or phrase above to see its translation, definition, examples, and pronunciation.
+            </p>
+        </section>
+    }
+</MudContainer>

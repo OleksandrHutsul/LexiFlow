@@ -1,0 +1,37 @@
+<div class="phrase-not-found">
+    <MudIcon Icon="@Icons.Material.Rounded.SearchOff" />
+
+    <h3>@Title</h3>
+    <p>We couldn’t find “@Phrase” in the dictionary.</p>
+
+    <div class="phrase-not-found-tips">
+        <strong>Try:</strong>
+        <ul>
+            <li>selecting fewer words;</li>
+            <li>checking whether the phrase is grammatically correct;</li>
+            <li>looking up individual words;</li>
+            <li>trying a similar expression.</li>
+        </ul>
+    </div>
+
+    @if (Alternatives.Count > 0)
+    {
+        <div class="phrase-alternatives">
+            <strong>Similar matches</strong>
+
+            <div class="chip-cloud">
+                @foreach (var suggestion in Alternatives)
+                {
+                    <button type="button" @onclick="() => OnSelectAlternative.InvokeAsync(suggestion.Word)">@suggestion.Word</button>
+                }
+            </div>
+        </div>
+    }
+
+    @if (ChildContent is not null)
+    {
+        <div class="phrase-not-found-actions">
+            @ChildContent
+        </div>
+    }
+</div>

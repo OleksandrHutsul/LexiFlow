@@ -1,0 +1,7 @@
+.search-help {
+    display: flex;
+    gap: .45rem;
+    align-items: center;
+    color: var(--mud-palette-text-secondary);
+    font-size: .9rem;
+}

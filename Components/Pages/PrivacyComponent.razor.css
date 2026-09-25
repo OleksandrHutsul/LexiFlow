@@ -1,0 +1,14 @@
+.legal-article {
+    display: grid;
+    gap: .85rem;
+}
+
+.legal-article h2 {
+    margin: 1.1rem 0 0;
+    font-size: 1.15rem;
+}
+
+.legal-article ul {
+    margin: .35rem 0 0;
+    padding-left: 1.2rem;
+}

@@ -1,0 +1,133 @@
+@page "/lists"
+@using LexiFlow.Components.Shared.UI
+@attribute [Authorize]
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="screen">
+    <div class="lists-screen">
+    <section class="page-header reveal">
+        <span class="eyebrow">Vocabulary lists</span>
+        <h1>Build focused word sets.</h1>
+        <p>Keep personal lists tidy, open shared sets, and create a new collection when a theme starts taking shape.</p>
+    </section>
+
+    <section class="list-workspace reveal">
+        <div class="list-panel">
+            <div class="section-heading">
+                <div>
+                    <h2>Create list</h2>
+                    <p class="muted">Name it by topic, exam, book, or anything you are learning through.</p>
+                </div>
+            </div>
+
+            <MudTextField @bind-Value="_newName"
+                          Label="Name"
+                          Variant="Variant.Outlined" />
+
+            <MudTextField @bind-Value="_newDescription"
+                          Label="Description"
+                          Variant="Variant.Outlined"
+                          Lines="3" />
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Rounded.Add"
+                       Disabled="_saving"
+                       OnClick="CreateListAsync">
+                Create
+            </MudButton>
+        </div>
+
+        <div class="list-panel">
+            <div class="section-heading">
+                <div>
+                    <h2>@(_showArchived ? "Archived lists" : "Your lists")</h2>
+                    <p class="muted">@(_showArchived ? _archived.Count : _owned.Count) collections</p>
+                </div>
+
+                <div>
+                    <MudButton Variant="Variant.Text"
+                               StartIcon="@(_showArchived ? Icons.Material.Rounded.List : Icons.Material.Rounded.Archive)"
+                               OnClick="ToggleArchived">
+                        @(_showArchived ? "Active" : "Archived")
+                    </MudButton>
+
+                    <MudIconButton Icon="@Icons.Material.Rounded.Refresh"
+                                   OnClick="LoadAsync"
+                                   aria-label="Refresh lists" />
+                </div>
+            </div>
+
+            @if (_loading)
+            {
+                <div class="skeleton-list">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            }
+            else if ((_showArchived ? _archived : _owned).Count == 0)
+            {
+                <EmptyStateComponent Title="@(_showArchived ? "No archived lists" : "No lists yet")"
+                            Text="@(_showArchived ? "Archived lists will appear here." : "Create your first list to start collecting words by theme.")" />
+            }
+            else
+            {
+                <div class="vocab-list-grid">
+                    @foreach (var list in (_showArchived ? _archived : _owned))
+                    {
+                        <button class="vocab-list-card @(_showArchived ? "archived-card" : "")"
+                                @onclick="() => OpenList(list.Id)">
+                            <span class="level-pill">@list.WordCount words</span>
+                            <h3>@list.Name</h3>
+                            <p>@(string.IsNullOrWhiteSpace(list.Description) ? "No description" : list.Description)</p>
+                            <small>Created @list.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")</small>
+                        </button>
+                    }
+                </div>
+            }
+        </div>
+    </section>
+
+    <section class="list-panel reveal">
+        <div class="section-heading">
+            <div>
+                <h2>Shared with you</h2>
+                <p class="muted">@_shared.Count read-only collections</p>
+            </div>
+        </div>
+
+        @if (_loading)
+        {
+            <div class="skeleton-list">
+                <span></span>
+                <span></span>
+            </div>
+        }
+        else if (_shared.Count == 0)
+        {
+            <EmptyStateComponent Title="No shared lists"
+                        Text="Lists shared with your account will appear here." />
+        }
+        else
+        {
+            <div class="shared-list-grid">
+                @foreach (var list in _shared)
+                {
+                    <button type="button"
+                            class="shared-list-card"
+                            @onclick="() => OpenList(list.Id)">
+                        <span class="shared-list-badge">@list.Permission</span>
+                        <h3>@list.Name</h3>
+                        <p>@(string.IsNullOrWhiteSpace(list.Description) ? $"Shared by {list.OwnerName}" : list.Description)</p>
+                        <span class="shared-list-meta">
+                            <span>@list.WordCount words</span>
+                            <span aria-hidden="true">·</span>
+                            <span>@list.OwnerName</span>
+                        </span>
+                    </button>
+                }
+            </div>
+        }
+    </section>
+    </div>
+</MudContainer>

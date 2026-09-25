@@ -1,0 +1,36 @@
+.nav-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding: 5.2rem 1rem 1rem;
+}
+
+.nav-section {
+    display: grid;
+    gap: .35rem;
+}
+
+.nav-section > span {
+    color: var(--text-soft);
+    font-size: .74rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+::deep .nav-link {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    padding: .75rem .85rem;
+    border-radius: 14px;
+    color: var(--mud-palette-text-secondary);
+    transition: transform .18s ease, background .18s ease, color .18s ease;
+}
+
+::deep .nav-link:hover,
+::deep .nav-link.active {
+    color: var(--mud-palette-text-primary);
+    background: rgba(124, 92, 255, .14);
+    transform: translateX(2px);
+}

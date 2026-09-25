@@ -1,0 +1,73 @@
+.notification-menu {
+    width: min(360px, 85vw);
+    max-height: 440px;
+    overflow: auto;
+    padding: .75rem;
+}
+
+.notification-bell-button {
+    position: relative;
+    display: grid;
+    width: 40px;
+    height: 40px;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+}
+
+.notification-bell-button:hover {
+    background: color-mix(in srgb, currentColor 10%, transparent);
+}
+
+.notification-count {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    display: grid;
+    min-width: 19px;
+    height: 19px;
+    place-items: center;
+    padding: 0 4px;
+    border: 2px solid var(--mud-palette-appbar-background);
+    border-radius: 999px;
+    background: var(--mud-palette-error);
+    color: white;
+    font-size: .68rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.notification-menu h3 {
+    margin: 0;
+}
+
+.notification-item {
+    display: grid;
+    width: 100%;
+    gap: .2rem;
+    padding: .75rem;
+    border: 0;
+    border-radius: 10px;
+    border-bottom: 1px solid var(--line);
+    background: transparent;
+    color: var(--mud-palette-text-primary);
+    text-align: left;
+    cursor: pointer;
+}
+
+.notification-item:hover {
+    background: color-mix(in srgb, var(--mud-palette-primary) 12%, transparent);
+}
+
+.notification-item span,
+.notification-item small {
+    color: var(--mud-palette-text-secondary);
+}
+
+.notification-item.unread {
+    background: color-mix(in srgb, var(--mud-palette-primary) 10%, transparent);
+}

@@ -1,0 +1,92 @@
+@page "/contact"
+@using LexiFlow.Components.Shared.UI
+@attribute [AllowAnonymous]
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="screen legal-screen">
+    <section class="page-header reveal">
+        <span class="eyebrow">Support</span>
+        <h1>Contact / Report a Bug</h1>
+        <p>Tell us about bugs, incorrect translations or dictionary data, or ideas for LexiFlow.</p>
+    </section>
+
+    <section class="glass-card reveal contact-card">
+        <h2>Developer contact</h2>
+        <p>
+            <strong>@ContactInfo.DeveloperName</strong><br />
+            Email:
+            <a href="@($"mailto:{ContactInfo.Email}")">@ContactInfo.Email</a>
+        </p>
+
+        <div class="contact-social">
+            <a href="@ContactInfo.LinkedInUrl" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+            <a href="@ContactInfo.GitHubUrl" target="_blank" rel="noopener noreferrer">GitHub</a>
+            <a href="/privacy">Privacy Policy</a>
+        </div>
+    </section>
+
+    @if (_submitted)
+    {
+        <section class="glass-card reveal">
+            <EmptyStateComponent Title="Report received"
+                        Text="Thank you. Your report was saved and will be reviewed. You can keep using LexiFlow or send another report if needed." />
+
+            <MudButton Variant="Variant.Outlined" OnClick="ResetForm">Send another report</MudButton>
+        </section>
+    }
+    else
+    {
+        <section class="glass-card reveal contact-form-card">
+            <h2>Send a report</h2>
+
+            <p class="muted">
+                Technical diagnostics below are limited to page, app version, browser, and timestamp.
+                Uploaded images, recognized OCR text, and account passwords are not attached automatically.
+            </p>
+
+            <MudSelect T="string" @bind-Value="_type" Label="Type" Variant="Variant.Outlined">
+                @foreach (var option in ReportTypes)
+                {
+                    <MudSelectItem T="string" Value="@option">@option</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudTextField @bind-Value="_description"
+                          Label="Description"
+                          Variant="Variant.Outlined"
+                          Lines="5"
+                          Counter="4000"
+                          MaxLength="4000"
+                          HelperText="What happened, and what did you expect?" />
+
+            <MudTextField @bind-Value="_pageOrFeature"
+                          Label="Page / feature"
+                          Variant="Variant.Outlined"
+                          Placeholder="Photo Translate, Dictionary, Flashcards"
+                          HelperText="Optional. Page or feature where the issue occurred." />
+
+            <MudTextField @bind-Value="_email"
+                          Label="Email (optional)"
+                          Variant="Variant.Outlined"
+                          InputType="InputType.Email"
+                          HelperText="Only if you want a reply." />
+
+            <MudCheckBox T="bool"
+                         @bind-Value="_includeDiagnostics"
+                         Label="Include anonymous diagnostics (page, version, browser, timestamp)"
+                         Color="Color.Primary" />
+
+            @if (!string.IsNullOrWhiteSpace(_error))
+            {
+                <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined">@_error</MudAlert>
+            }
+
+            <div class="contact-actions">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="_sending" OnClick="SubmitAsync">
+                    @(_sending ? "Sending…" : "Submit report")
+                </MudButton>
+
+                <MudButton Variant="Variant.Text" Href="@($"mailto:{ContactInfo.Email}")">Email instead</MudButton>
+            </div>
+        </section>
+    }
+</MudContainer>

@@ -1,0 +1,27 @@
+<MudDialog>
+    <DialogContent>
+        <div class="collection-editor-form">
+            <MudTextField @bind-Value="_name" Label="Collection name" Variant="Variant.Outlined" Immediate="true" />
+
+            <MudSelect T="string" @bind-Value="_accent" Label="Color" Variant="Variant.Outlined">
+                <MudSelectItem Value="@("#35d39d")">Green</MudSelectItem>
+                <MudSelectItem Value="@("#7c5cff")">Purple</MudSelectItem>
+                <MudSelectItem Value="@("#ffb020")">Amber</MudSelectItem>
+                <MudSelectItem Value="@("#4aa8ff")">Blue</MudSelectItem>
+                <MudSelectItem Value="@("#ff5c8a")">Pink</MudSelectItem>
+            </MudSelect>
+
+            <MudCheckBox T="bool" @bind-Value="_makeDefault" Label="Use as my default collection" />
+
+            @if (_error is not null)
+            {
+                <p class="validation-message">@_error</p>
+            }
+        </div>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@_saving" OnClick="SaveAsync">Save collection</MudButton>
+    </DialogActions>
+</MudDialog>

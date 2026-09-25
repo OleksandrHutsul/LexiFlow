@@ -1,0 +1,46 @@
+<MudDialog>
+    <DialogContent>
+        <p class="muted">Choose where these words should be saved.</p>
+
+        @if (_loading)
+        {
+            <MudProgressLinear Indeterminate="true" />
+        }
+        else
+        {
+            <div class="collection-picker-list">
+                @foreach (var collection in _collections)
+                {
+                    <button type="button" class="collection-picker-option" style="--accent:@collection.Accent" @onclick="() => Choose(collection.Id)">
+                        <MudIcon Icon="@(collection.IsDefault? Icons.Material.Rounded.Star : Icons.Material.Rounded.Folder)" />
+                        <span>
+                            <strong>@collection.Name</strong>
+                            <small>@collection.Words.Count words @(collection.IsDefault ? "· Default" : "")</small>
+                        </span>
+                        <MudIcon Icon="@Icons.Material.Rounded.ArrowForward" />
+                    </button>
+                }
+            </div>
+
+            <MudDivider Class="my-4" />
+
+            <h3>Create a collection</h3>
+
+            <div class="inline-form">
+                <MudTextField @bind-Value="_newName" Label="Collection name" Variant="Variant.Outlined" Immediate="true" />
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@_saving" OnClick="CreateAndChooseAsync">Create & choose</MudButton>
+            </div>
+
+            <MudCheckBox T="bool" @bind-Value="_makeDefault" Label="Make this my default collection" />
+
+            @if (_error is not null)
+            {
+                <p class="validation-message">@_error</p>
+            }
+        }
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>

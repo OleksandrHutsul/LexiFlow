@@ -1,0 +1,16 @@
+@if (Items is { Count: > 0 })
+{
+    <section class="glass-card reveal">
+        <h2>
+            <MudIcon Icon="@Icon" />
+            @Title
+        </h2>
+
+        <div class="chip-cloud">
+            @foreach (var item in Items)
+            {
+                <span>@item</span>
+            }
+        </div>
+    </section>
+}

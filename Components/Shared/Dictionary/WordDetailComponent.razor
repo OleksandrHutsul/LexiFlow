@@ -1,0 +1,143 @@
+@if (Entry is not null)
+{
+    var primaryPart = Entry.Meanings.FirstOrDefault();
+    var primaryMeaning = primaryPart?.GuideWordGroups
+        .SelectMany(group => group.Meanings)
+        .FirstOrDefault();
+
+    var translations = Entry.Translations
+        .Select(translation => translation.Text)
+        .Where(text => !string.IsNullOrWhiteSpace(text))
+        .ToList();
+
+    var examples = Entry.Meanings
+        .SelectMany(part => part.GuideWordGroups)
+        .SelectMany(group => group.Meanings)
+        .SelectMany(meaning => meaning.Examples)
+        .Select(example => example.Text)
+        .Where(text => !string.IsNullOrWhiteSpace(text))
+        .Distinct()
+        .ToList();
+
+    var idioms = Entry.Idioms
+        .Select(item => item.Text)
+        .Where(text => !string.IsNullOrWhiteSpace(text))
+        .ToList();
+
+    var phrasalVerbs = Entry.PhrasalVerbs
+        .Select(item => item.Text)
+        .Where(text => !string.IsNullOrWhiteSpace(text))
+        .ToList();
+
+    var collocations = Entry.Collocations
+        .Select(item => item.Text)
+        .Where(text => !string.IsNullOrWhiteSpace(text))
+        .ToList();
+
+    <div class="word-hero reveal">
+        <div>
+            <div class="word-meta">
+                @if (!string.IsNullOrWhiteSpace(primaryMeaning?.CefrLevel))
+                {
+                    <span class="level-pill">@primaryMeaning.CefrLevel</span>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(primaryPart?.PartOfSpeech))
+                {
+                    <span>@primaryPart.PartOfSpeech</span>
+                }
+            </div>
+
+            <h1>@Entry.Word</h1>
+
+            @if (Entry.Pronunciations.Count > 0)
+            {
+                <div class="pronunciation-list">
+                    @foreach (var pronunciation in OrderedPronunciations)
+                    {
+                        <div class="pronunciation-item @(IsPreferredDialect(pronunciation.Dialect) ? "preferred" : "")">
+                            @if (!string.IsNullOrWhiteSpace(pronunciation.AudioUrl))
+                            {
+                                <MudButton Variant="@(IsPreferredDialect(pronunciation.Dialect) ? Variant.Filled : Variant.Outlined)"
+                                           Color="Color.Primary"
+                                           Size="Size.Small"
+                                           StartIcon="@Icons.Material.Rounded.VolumeUp"
+                                           OnClick="() => PlayAudioAsync(pronunciation.AudioUrl)">
+                                    @pronunciation.Dialect
+                                </MudButton>
+                            }
+                            else
+                            {
+                                <MudButton Variant="Variant.Outlined"
+                                           Size="Size.Small"
+                                           Disabled="true">
+                                    @pronunciation.Dialect
+                                </MudButton>
+                            }
+
+                            @if (!string.IsNullOrWhiteSpace(pronunciation.Ipa))
+                            {
+                                <span>/@pronunciation.Ipa/</span>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+    </div>
+
+    <div class="word-actions">
+        <MudButton Variant="Variant.Outlined"
+                   Color="Color.Secondary"
+                   StartIcon="@(_isFavorite ? Icons.Material.Rounded.Bookmark : Icons.Material.Rounded.BookmarkBorder)"
+                   OnClick="ToggleFavoriteAsync">
+            @(_isFavorite ? "Saved to favorites" : "Save to favorites")
+        </MudButton>
+
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Rounded.School"
+                   Disabled="@_addingToLearning"
+                   OnClick="AddToLearningAsync">
+            Add to learning
+        </MudButton>
+
+        <small>
+            @(_defaultCollectionName is null
+                        ? "You’ll choose or create a collection before saving."
+                        : $"Words are added to your default “{_defaultCollectionName}” collection.")
+        </small>
+    </div>
+</div>
+
+    <div class="word-grid">
+        <section class="glass-card reveal">
+            <h2>Meanings</h2>
+
+        @foreach (var part in Entry.Meanings)
+            {
+                @foreach (var group in part.GuideWordGroups)
+                {
+                    @foreach (var meaning in group.Meanings)
+                    {
+                        <div class="meaning-row">
+                            <strong>@meaning.Definition</strong>
+
+                            @foreach (var example in meaning.Examples)
+                            {
+                                <p>@example.Text</p>
+                            }
+                        </div>
+                    }
+                }
+            }
+        </section>
+
+        <WordListCardComponent Title="Translations" Items="translations" Icon="@Icons.Material.Rounded.Translate" />
+        <WordListCardComponent Title="Examples" Items="examples" Icon="@Icons.Material.Rounded.FormatQuote" />
+        <WordListCardComponent Title="Synonyms" Items="Entry.Synonyms" Icon="@Icons.Material.Rounded.Hub" />
+        <WordListCardComponent Title="Antonyms" Items="Entry.Antonyms" Icon="@Icons.Material.Rounded.CompareArrows" />
+        <WordListCardComponent Title="Idioms" Items="idioms" Icon="@Icons.Material.Rounded.Lightbulb" />
+        <WordListCardComponent Title="Phrasal verbs" Items="phrasalVerbs" Icon="@Icons.Material.Rounded.CallSplit" />
+        <WordListCardComponent Title="Collocations" Items="collocations" Icon="@Icons.Material.Rounded.Grain" />
+    </div>
+}

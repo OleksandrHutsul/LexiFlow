@@ -1,0 +1,12 @@
+.empty-state {
+    display: grid;
+    justify-items: center;
+    gap: .8rem;
+    padding: 3rem 1rem;
+    text-align: center;
+    color: var(--mud-palette-text-secondary);
+}
+
+    .empty-state h3 {
+        color: var(--mud-palette-text-primary);
+    }

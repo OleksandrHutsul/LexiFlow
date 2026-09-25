@@ -1,0 +1,51 @@
+.word-grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.word-grid > section.glass-card {
+    display: grid;
+    align-content: start;
+    gap: .85rem;
+}
+
+.word-grid > section.glass-card > h2 {
+    margin: 0;
+}
+
+.meaning-row {
+    display: grid;
+    gap: .45rem;
+    padding: 1.1rem 0;
+    border-bottom: 1px solid var(--line);
+}
+
+.meaning-row:first-of-type {
+    padding-top: .25rem;
+}
+
+.meaning-row:last-child {
+    border-bottom: 0;
+    padding-bottom: .15rem;
+}
+
+.meaning-row strong {
+    display: block;
+    line-height: 1.55;
+    font-weight: 700;
+}
+
+.meaning-row p {
+    margin: 0;
+    color: var(--mud-palette-text-secondary);
+    line-height: 1.55;
+}
+
+@media (max-width: 1100px) {
+    .word-grid {
+        grid-template-columns: 1fr;
+    }
+}

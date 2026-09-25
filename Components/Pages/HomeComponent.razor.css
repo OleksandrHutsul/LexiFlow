@@ -1,0 +1,119 @@
+.home-screen {
+    display: grid;
+    gap: 1.2rem;
+}
+
+.dashboard-grid > .glass-card {
+    display: grid;
+    gap: .85rem;
+}
+
+.dashboard-grid > .glass-card > .section-heading {
+    margin-bottom: 0;
+}
+
+.hero-panel {
+    position: relative;
+    z-index: 10;
+    overflow: visible;
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(280px, .75fr);
+    gap: 2rem;
+    align-items: center;
+    min-height: 450px;
+    padding: clamp(1.5rem, 5vw, 4rem);
+    border: 1px solid var(--line);
+    border-radius: 28px;
+    background: radial-gradient(circle at 20% 10%, rgba(124, 92, 255, .24), transparent 34%), linear-gradient(135deg, rgba(255,255,255,.14), rgba(255,255,255,.04));
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(26px);
+}
+
+.hero-copy {
+    display: grid;
+    gap: 1.2rem;
+}
+
+.hero-copy p {
+    color: var(--mud-palette-text-secondary);
+    font-size: 1.02rem;
+}
+
+.week-bars {
+    display: flex;
+    align-items: end;
+    gap: .65rem;
+    height: 160px;
+    padding-top: 1rem;
+}
+
+.week-bars span {
+    display: block;
+    width: 100%;
+    min-height: 10px;
+    border-radius: 999px 999px 4px 4px;
+    background: linear-gradient(180deg, #8b7dff, #35d39d);
+}
+
+.streak-orbit {
+    position: relative;
+    min-height: 320px;
+}
+
+.streak-ring {
+    position: absolute;
+    inset: 50% auto auto 50%;
+    display: grid;
+    width: 220px;
+    height: 220px;
+    place-items: center;
+    transform: translate(-50%, -50%);
+    border-radius: 999px;
+    border: 18px solid rgba(124, 92, 255, .18);
+    background: radial-gradient(circle, rgba(255,255,255,.16), rgba(255,255,255,.04));
+    animation: floaty 5s ease-in-out infinite;
+}
+
+.streak-ring strong {
+    font-size: 4.5rem;
+    line-height: .8;
+}
+
+.streak-ring span {
+    color: var(--mud-palette-text-secondary);
+}
+
+.mini-card {
+    position: absolute;
+    padding: .8rem 1rem;
+    border-radius: 16px;
+    background: rgba(255,255,255,.14);
+    border: 1px solid var(--line);
+}
+
+.mini-card.one {
+    top: 10%;
+    right: 2%;
+}
+
+.mini-card.two {
+    bottom: 12%;
+    left: 0;
+}
+
+@media (max-width: 1100px) {
+    .hero-panel {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 760px) {
+    .hero-panel {
+        padding: 1.2rem;
+        border-radius: 20px;
+    }
+
+    .streak-orbit {
+        min-height: 260px;
+    }
+}

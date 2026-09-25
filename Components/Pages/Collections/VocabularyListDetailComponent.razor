@@ -1,0 +1,390 @@
+@page "/lists/{ListId:guid}"
+@using LexiFlow.Components.Shared.UI
+@attribute [Authorize]
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="screen">
+    <div class="lists-screen">
+    @if (_loading)
+    {
+        <div class="word-skeleton">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    }
+    else if (_list is null)
+    {
+        <EmptyStateComponent Title="List not found"
+                    Text="The list may have been deleted or is not shared with you."
+                    ActionHref="/lists"
+                    ActionText="Back to lists" />
+    }
+    else
+    {
+        <section class="word-hero vocab-hero reveal">
+            <div>
+                <span class="eyebrow">@(_list.IsOwner ? "Owner" : _list.Permission)</span>
+                <h1>@_list.Name</h1>
+                <p>@(string.IsNullOrWhiteSpace(_list.Description) ? "No description" : _list.Description)</p>
+
+                <div class="word-meta">
+                    <span class="level-pill">@_list.WordCount words</span>
+                    <span class="level-pill">By @_list.OwnerName</span>
+
+                    @if (_list.IsArchived)
+                    {
+                        <span class="level-pill archived">Archived</span>
+                    }
+                </div>
+            </div>
+
+            <div class="word-actions">
+                <MudButton Href="/lists"
+                           Variant="Variant.Outlined"
+                           StartIcon="@Icons.Material.Rounded.ArrowBack">
+                    Back
+                </MudButton>
+
+                @if (_list.IsOwner)
+                {
+                    <MudButton Variant="Variant.Outlined"
+                               StartIcon="@(_list.IsArchived ? Icons.Material.Rounded.Unarchive : Icons.Material.Rounded.Archive)"
+                               Disabled="_saving"
+                               OnClick="ToggleArchiveAsync">
+                        @(_list.IsArchived ? "Restore" : "Archive")
+                    </MudButton>
+
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Error"
+                               StartIcon="@Icons.Material.Rounded.Delete"
+                               Disabled="_saving"
+                               OnClick="DeleteListAsync">
+                        Delete
+                    </MudButton>
+                }
+            </div>
+        </section>
+
+        @if (!_list.IsOwner && _list.Words.Count > 0)
+        {
+            <section class="list-panel study-panel reveal">
+                <div class="section-heading">
+                    <div>
+                        <h2>Flashcards</h2>
+                        <p class="muted">Tap the card to reveal the answer.</p>
+                    </div>
+
+                    <strong>@(_cardIndex + 1) of @_list.Words.Count</strong>
+                </div>
+
+                @{
+                    var card = _list.Words[_cardIndex];
+                }
+
+                <div class="flashcard @(_flipped ? "flipped" : "")" @onclick="FlipCard">
+                    <div class="flashcard-inner">
+                        <div class="flashcard-face">
+                            <span class="eyebrow">@card.PartOfSpeech</span>
+                            <h2>@card.Word</h2>
+
+                            <div class="pronunciation-list" @onclick:stopPropagation="true">
+                                <MudButton Variant="Variant.Outlined"
+                                           StartIcon="@Icons.Material.Rounded.VolumeUp"
+                                           Disabled="@string.IsNullOrWhiteSpace(card.BritishAudioUrl)"
+                                           OnClick="() => PlayAudioAsync(card.BritishAudioUrl)">
+                                    UK @card.BritishIpa
+                                </MudButton>
+
+                                <MudButton Variant="Variant.Outlined"
+                                           StartIcon="@Icons.Material.Rounded.VolumeUp"
+                                           Disabled="@string.IsNullOrWhiteSpace(card.AmericanAudioUrl)"
+                                           OnClick="() => PlayAudioAsync(card.AmericanAudioUrl)">
+                                    US @card.AmericanIpa
+                                </MudButton>
+                            </div>
+
+                            <small>Tap to reveal</small>
+                        </div>
+
+                        <div class="flashcard-face flashcard-back">
+                            <h2>@(card.Translation ?? "Translation unavailable")</h2>
+
+                            @if (!string.IsNullOrWhiteSpace(card.Definition))
+                            {
+                                <p>@card.Definition</p>
+                            }
+
+                            @if (!string.IsNullOrWhiteSpace(card.Example))
+                            {
+                                <em>“@card.Example”</em>
+                            }
+
+                            <small>Tap to flip back</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="review-actions">
+                    <MudButton Variant="Variant.Outlined"
+                               StartIcon="@Icons.Material.Rounded.ArrowBack"
+                               Disabled="@(_cardIndex == 0)"
+                               OnClick="PreviousCard">
+                        Previous
+                    </MudButton>
+
+                    <MudButton Variant="Variant.Filled"
+                               EndIcon="@Icons.Material.Rounded.ArrowForward"
+                               Disabled="@(_cardIndex == _list.Words.Count - 1)"
+                               OnClick="NextCard">
+                        Next
+                    </MudButton>
+                </div>
+
+                @if (!_testActive && !_testComplete)
+                {
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Secondary"
+                               StartIcon="@Icons.Material.Rounded.Quiz"
+                               Disabled="@(!_list.Words.Any(word => !string.IsNullOrWhiteSpace(word.Translation)))"
+                               OnClick="StartTestAsync">
+                        Start test
+                    </MudButton>
+                }
+
+                @if (_testActive)
+                {
+                    var question = _questions[_questionIndex];
+
+                    <div class="quiz-card">
+                        <MudProgressLinear Value="@TestProgress" Color="Color.Primary" />
+                        <span>@(_questionIndex + 1) of @_questions.Count</span>
+                        <h3>@question.Prompt</h3>
+
+                        @if (question.Choices.Count > 0)
+                        {
+                            <div class="quiz-options">
+                                @foreach (var choice in question.Choices)
+                                {
+                                    <MudButton Variant="Variant.Outlined"
+                                               Disabled="_answering"
+                                               OnClick="() => AnswerAsync(choice)">
+                                        @choice
+                                    </MudButton>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="inline-form">
+                                <MudTextField @bind-Value="_typedAnswer"
+                                              Label="English word"
+                                              Variant="Variant.Outlined" />
+
+                                <MudButton Variant="Variant.Filled"
+                                           Disabled="_answering"
+                                           OnClick="() => AnswerAsync(_typedAnswer)">
+                                    Answer
+                                </MudButton>
+                            </div>
+                        }
+                    </div>
+                }
+
+                @if (_testComplete)
+                {
+                    <div class="result-card">
+                        <h2>@_correct / @_questions.Count</h2>
+                        <p>Test complete</p>
+
+                        @foreach (var answer in _answers)
+                        {
+                            <div class="answer-review @(answer.Correct ? "correct" : "incorrect")">
+                                <strong>@answer.Prompt</strong>
+                                <span>Your answer: @answer.Given</span>
+                                <span>Correct: @answer.Expected</span>
+                            </div>
+                        }
+
+                        <MudButton Variant="Variant.Filled" OnClick="StartTestAsync">
+                            Try again
+                        </MudButton>
+                    </div>
+                }
+            </section>
+        }
+
+        <section class="list-workspace reveal">
+            <div class="list-panel">
+                <div class="section-heading">
+                    <div>
+                        <h2>Words</h2>
+                        <p class="muted">@(_list.IsOwner ? "Select entries returned by the dictionary." : "Words in this assignment")</p>
+                    </div>
+                </div>
+
+                @if (_list.IsOwner && !_list.IsArchived)
+                {
+                    <div class="dictionary-picker">
+                        <MudTextField T="string"
+                                      Value="@_searchText"
+                                      ValueChanged="SearchChangedAsync"
+                                      Immediate="true"
+                                      DebounceInterval="350"
+                                      Placeholder="Search dictionary"
+                                      Variant="Variant.Outlined"
+                                      Adornment="Adornment.Start"
+                                      AdornmentIcon="@Icons.Material.Rounded.Search" />
+
+                        @if (_searching)
+                        {
+                            <MudProgressLinear Indeterminate="true" />
+                        }
+                        else if (!string.IsNullOrWhiteSpace(_searchError))
+                        {
+                            <p class="validation-message">@_searchError</p>
+                        }
+                        else if (_searchText.Length >= 2 && _suggestions.Count == 0)
+                        {
+                            <p class="muted">No dictionary entries found.</p>
+                        }
+
+                        @if (_suggestions.Count > 0)
+                        {
+                            <div class="suggestion-list">
+                                @foreach (var suggestion in _suggestions)
+                                {
+                                    <button type="button" @onclick="() => SelectSuggestionAsync(suggestion)">
+                                        <strong>@suggestion.Word</strong>
+                                        <span>@suggestion.PartOfSpeech · @(suggestion.Translation ?? suggestion.Summary ?? suggestion.Pronunciation ?? "Dictionary entry")</span>
+                                    </button>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+
+                @if (_list.Words.Count == 0)
+                {
+                    <EmptyStateComponent Title="No words yet" Text="No dictionary entries have been added." />
+                }
+                else
+                {
+                    <div class="word-list">
+                        @foreach (var word in _list.Words)
+                        {
+                            <div class="word-list-row">
+                                <div>
+                                    <a href="@($"/dictionary?word={Uri.EscapeDataString(word.Word)}")">@word.Word</a>
+                                    <small>@word.PartOfSpeech · @word.Translation</small>
+                                </div>
+
+                                @if (_list.IsOwner)
+                                {
+                                    <MudIconButton Icon="@Icons.Material.Rounded.Close"
+                                                   Color="Color.Error"
+                                                   Disabled="_saving"
+                                                   OnClick="() => RemoveWordAsync(word.Id)" />
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
+            <div class="list-panel">
+                <div class="section-heading">
+                    <div>
+                        <h2>List details</h2>
+                        <p class="muted">@(_list.IsOwner ? "Edit and manage access." : "Shared by the owner.")</p>
+                    </div>
+                </div>
+
+                @if (_list.IsOwner)
+                {
+                    <MudTextField @bind-Value="_editName"
+                                  Label="Name"
+                                  Variant="Variant.Outlined" />
+
+                    <MudTextField @bind-Value="_editDescription"
+                                  Label="Description"
+                                  Variant="Variant.Outlined"
+                                  Lines="3" />
+
+                    <MudButton Variant="Variant.Filled"
+                               Disabled="_saving"
+                               OnClick="SaveListAsync">
+                        Save
+                    </MudButton>
+
+                    <div class="share-box">
+                        <h3>Share</h3>
+
+                        <div class="dictionary-picker">
+                            <div class="inline-form">
+                                <MudTextField T="string"
+                                              Value="@_shareEmail"
+                                              ValueChanged="SearchUsersChangedAsync"
+                                              Immediate="true"
+                                              DebounceInterval="350"
+                                              Placeholder="Search users by name or email"
+                                              Variant="Variant.Outlined" />
+
+                                <MudButton Variant="Variant.Outlined"
+                                           Disabled="@(_saving || _list.IsArchived)"
+                                           OnClick="ShareListAsync">
+                                    Share
+                                </MudButton>
+                            </div>
+
+                            @if (_userSuggestions.Count > 0)
+                            {
+                                <div class="suggestion-list">
+                                    @foreach (var user in _userSuggestions)
+                                    {
+                                        <button type="button" @onclick="() => SelectUser(user)">
+                                            <strong>@user.Name</strong>
+                                            <span>@user.Email</span>
+                                        </button>
+                                    }
+                                </div>
+                            }
+                        </div>
+
+                        @if (_list.IsArchived)
+                        {
+                            <p class="validation-message">Restore this list before assigning it.</p>
+                        }
+
+                        @foreach (var share in _list.Shares)
+                        {
+                            <div class="share-row">
+                                <div>
+                                    <strong>@share.UserName</strong>
+                                    <small>@share.Email</small>
+                                </div>
+
+                                <span class="level-pill">@share.Permission</span>
+
+                                <MudIconButton Icon="@Icons.Material.Rounded.LinkOff"
+                                               Color="Color.Error"
+                                               OnClick="() => RemoveShareAsync(share.UserId)" />
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="read-only-panel">
+                        <MudIcon Icon="@Icons.Material.Rounded.Lock" />
+
+                        <div>
+                            <h3>Student access</h3>
+                            <p class="muted">Study the cards and complete the test above.</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        </section>
+    }
+    </div>
+</MudContainer>

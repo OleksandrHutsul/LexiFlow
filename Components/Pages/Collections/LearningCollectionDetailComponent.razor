@@ -1,0 +1,86 @@
+@page "/learning/{CollectionId:guid}"
+@using LexiFlow.Components.Shared.UI
+@attribute [Authorize]
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="screen">
+    @if (_loading)
+    {
+        <div class="skeleton-list">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    }
+    else if (_collection is null)
+    {
+        <EmptyStateComponent Title="Collection not found"
+                    Text="It may have been deleted."
+                    ActionHref="/learning"
+                    ActionText="Back to Learning" />
+    }
+    else
+    {
+        <section class="page-header reveal">
+            <span class="eyebrow">
+                @_collection.Words.Count words
+
+                @if (_collection.IsDefault)
+                {
+                    <text>· Default</text>
+                }
+            </span>
+
+            <h1>@_collection.Name</h1>
+            <p>Review every word in this collection, then study with flashcards.</p>
+
+            <div class="collection-detail-actions">
+                <MudButton Href="/learning"
+                           Variant="Variant.Outlined"
+                           StartIcon="@Icons.Material.Rounded.ArrowBack">
+                    Back
+                </MudButton>
+
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Rounded.Style"
+                           Disabled="@(_collection.Words.Count == 0)"
+                           Href="@($"/flashcards?collectionId={_collection.Id}")">
+                    Study
+                </MudButton>
+            </div>
+        </section>
+
+        @if (_collection.Words.Count == 0)
+        {
+            <EmptyStateComponent Title="No words yet"
+                        Text="Add words from Dictionary or Photo Translate to fill this collection."
+                        ActionHref="/dictionary"
+                        ActionText="Open Dictionary" />
+        }
+        else
+        {
+            <section class="list-panel reveal">
+                <div class="section-heading">
+                    <div>
+                        <span class="eyebrow">Word list</span>
+                        <h2>All words</h2>
+                    </div>
+                </div>
+
+                <div class="word-list">
+                    @foreach (var word in _collection.Words)
+                    {
+                        <div class="word-list-row" @key="word.Id">
+                            <div>
+                                <a href="@($"/dictionary?word={Uri.EscapeDataString(word.Word)}")">@word.Word</a>
+                                <small>@(word.Translation ?? word.Definition ?? "No translation yet")</small>
+                            </div>
+
+                            <MudChip T="string" Size="Size.Small">@StateLabel(word.State)</MudChip>
+                        </div>
+                    }
+                </div>
+            </section>
+        }
+    }
+</MudContainer>

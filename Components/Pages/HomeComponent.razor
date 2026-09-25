@@ -1,0 +1,141 @@
+@page "/"
+@using LexiFlow.Components.Shared.Dictionary
+@using LexiFlow.Components.Shared.UI
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="screen">
+    <div class="home-screen">
+    <section class="hero-panel reveal">
+        <div class="hero-copy">
+            <span class="eyebrow">Modern English learning</span>
+            <h1>Build vocabulary that actually stays with you.</h1>
+            <p>Search the dictionary, save useful words, practice with flashcards, and keep your daily flow alive.</p>
+
+            <AppSearchComponent NavigateOnSelect="true" />
+        </div>
+
+        <div class="streak-orbit" aria-label="Daily learning progress" aria-busy="@_loading">
+            <div class="streak-ring">
+                <strong>@(_loading ? "–" : _stats.Streak.ToString())</strong>
+                <span>day streak</span>
+            </div>
+
+            <div class="mini-card one">@(_loading ? "Loading…" : $"+{_stats.DailyProgress} words today")</div>
+            <div class="mini-card two">@(_loading ? "Loading…" : $"{_stats.Accuracy:P0} accuracy")</div>
+        </div>
+    </section>
+
+    @if (_loadError is not null)
+    {
+        <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined">@_loadError</MudAlert>
+    }
+
+    <section class="metric-grid">
+        <MetricCardComponent Label="Learned"
+                    Value="@StatValue(_stats.LearnedWords)"
+                    Caption="Words in collections"
+                    Icon="@Icons.Material.Rounded.AutoStories"
+                    Accent="#7c5cff" />
+
+        <MetricCardComponent Label="Mastered"
+                    Value="@StatValue(_stats.MasteredWords)"
+                    Caption="Ready for real use"
+                    Icon="@Icons.Material.Rounded.Verified"
+                    Accent="#35d39d" />
+
+        <MetricCardComponent Label="Favorites"
+                    Value="@StatValue(_stats.FavoriteWords)"
+                    Caption="Saved for later"
+                    Icon="@Icons.Material.Rounded.Bookmark"
+                    Accent="#ff5c8a" />
+
+        <MetricCardComponent Label="Study time"
+                    Value="@StudyTimeValue"
+                    Caption="Active practice"
+                    Icon="@Icons.Material.Rounded.Timer"
+                    Accent="#ffb020" />
+    </section>
+
+    <div class="dashboard-grid">
+        <section class="glass-card reveal">
+            <div class="section-heading">
+                <div>
+                    <span class="eyebrow">Continue learning</span>
+                    <h2>Next review</h2>
+                </div>
+
+                <MudButton Href="/flashcards"
+                           Variant="Variant.Text"
+                           EndIcon="@Icons.Material.Rounded.ArrowForward">
+                    Practice
+                </MudButton>
+            </div>
+
+            @if (_learning.Count == 0)
+            {
+                <EmptyStateComponent Title="No learning words yet"
+                            Text="Search a word and add it to a collection to start your loop."
+                            ActionHref="/dictionary"
+                            ActionText="Find words" />
+            }
+            else
+            {
+                @foreach (var word in _learning.Take(5))
+                {
+                    <div class="learning-row">
+                        <span>@word.Word</span>
+                        <MudChip T="string" Size="Size.Small" Color="Color.Primary">@word.State</MudChip>
+                    </div>
+                }
+            }
+        </section>
+
+        <section class="glass-card reveal">
+            <div class="section-heading">
+                <div>
+                    <span class="eyebrow">Today's goal</span>
+                    <h2>@_stats.DailyProgress / @_stats.DailyGoal words</h2>
+                </div>
+            </div>
+
+            <MudProgressLinear Value="@GoalPercent"
+                               Rounded="true"
+                               Size="Size.Large"
+                               Color="Color.Secondary" />
+
+            <div class="week-bars">
+                @foreach (var value in _stats.WeeklyActivity)
+                {
+                    <span style="height:@value%"></span>
+                }
+            </div>
+        </section>
+
+        <section class="glass-card reveal">
+            <div class="section-heading">
+                <div>
+                    <span class="eyebrow">Favorite words</span>
+                    <h2>Quick recall</h2>
+                </div>
+
+                <MudButton Href="/favorites"
+                           Variant="Variant.Text"
+                           EndIcon="@Icons.Material.Rounded.ArrowForward">
+                    Open
+                </MudButton>
+            </div>
+
+            <div class="chip-cloud">
+                @foreach (var favorite in _favorites.Take(12))
+                {
+                    <button @onclick="() => OpenFavorite(favorite.Word)">@favorite.Word</button>
+                }
+            </div>
+
+            @if (_favorites.Count == 0)
+            {
+                <p class="muted">Favorites you bookmark will appear here.</p>
+            }
+        </section>
+    </div>
+    </div>
+</MudContainer>
