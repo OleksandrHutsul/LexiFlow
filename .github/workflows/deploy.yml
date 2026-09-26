@@ -1,0 +1,33 @@
+name: Deploy LexiFlow to Vercel
+
+on:
+  push:
+    branches:
+      - master
+
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore
+        run: dotnet restore LexiFlow.csproj
+
+      - name: Publish
+        run: dotnet publish LexiFlow.csproj -c Release -o publish
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Deploy to Vercel
+        run: vercel deploy publish/wwwroot --prod --token=${{ secrets.VERCEL_TOKEN }} --yes
