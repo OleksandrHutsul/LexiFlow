@@ -6,6 +6,11 @@ This repository is only the client. Accounts, dictionary data, photo translation
 
 There is no database in this repository. Some preferences and practice stats stay in the browser. Learning collections and vocabulary lists are stored by the API.
 
+### Project links
+
+- **Live application:** https://lexi-flow-plum.vercel.app/
+- **Backend API:** [DictionaryProvider API](https://github.com/OleksandrHutsul/DictionaryProvider.Api)
+
 ## Getting started
 
 ### Prerequisites
